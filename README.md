@@ -1,0 +1,1 @@
+# AmbariKave-azure-templates
