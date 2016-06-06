@@ -151,7 +151,7 @@
                 "templateName": "tmpl-hdp-with-ci",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
-		"pathURI": "/DataAnalyticsOrganization/AmbariKave-azure-templates/",
+		"pathURI": "/KaveIO/AmbariKave-azure-templates/",
 		"baseContentURI": "[concat('https://',variables('contentHost'),variables('pathURI'),variables('branchName'))]",
 		"baseMainURI": "[concat('https://',variables('mainHost'),variables('pathURI'))]",
 		"setupScriptsPath": "/Automation/setup/",
