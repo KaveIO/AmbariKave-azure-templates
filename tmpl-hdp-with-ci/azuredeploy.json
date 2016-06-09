@@ -154,7 +154,7 @@
 		"pathURI": "/KaveIO/AmbariKave-azure-templates/",
 		"baseContentURI": "[concat('https://',variables('contentHost'),variables('pathURI'),variables('branchName'))]",
 		"baseMainURI": "[concat('https://',variables('mainHost'),variables('pathURI'))]",
-		"setupScriptsPath": "/Automation/setup/",
+		"setupScriptsPath": "/automation/setup/",
 		"anyNodeSetupScript": "anynode_setup.sh",
 		"ambariNodeSetupScript": "ambarinode_setup.sh",
 		"extraDiskNodeSetupScript": "extradisknode_setup.sh",
