@@ -170,7 +170,7 @@
 		"commandToExecuteGateway": "[concat(variables('scriptInterpreter'), ' ', variables('gatewaySetupScript'))]",
 		"kaveScriptsURI": "[concat(variables('baseMainURI'),'archive/',variables('branchName'),'.zip')]",
 		"kaveBlueprint": "[concat(variables('baseContentURI'), '/', variables('templateName'), '/', 'blueprint.json')]",
-		"kaveCluster": "[concat(variables('baseContentURI'), '/', variables('blueprintPath'), '/', 'cluster.json')]",
+		"kaveCluster": "[concat(variables('baseContentURI'), '/', variables('templateName'), '/', 'cluster.json')]",
 		"nodes": "'ambari gate ci nno-0 nno-1 data-0 data-1 data-2'",
 		"version": "2.0-Beta",
 		"gateExtraDisk": "/dev/sdc",
