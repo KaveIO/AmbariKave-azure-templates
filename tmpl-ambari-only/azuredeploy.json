@@ -254,8 +254,6 @@
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('GatewayNodeName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('CiNodeName'))]",
         "NnoMachineLoop",
         "DataMachineLoop",
         "NnoMachineLoop"
