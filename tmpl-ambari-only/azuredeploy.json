@@ -253,11 +253,8 @@
       "apiVersion": "[variables('apiVersionCompute')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]",
-        "NnoMachineLoop",
-        "DataMachineLoop",
-        "NnoMachineLoop"
-      ],
+        "[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]"
+       ],
       "tags": {
         "displayName": "[parameters('AmbariNodeName')]"
       },
