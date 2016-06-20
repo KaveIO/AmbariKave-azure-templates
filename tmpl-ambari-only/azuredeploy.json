@@ -21,12 +21,6 @@
         "description": "Unique name for the azure storage account wich will be used for regular storage"
       }
     },
-    "saPremiumName": {
-      "type": "string",
-      "metadata": {
-        "description": "Unique name for the azure storage account wich will be used for premium storage"
-      }
-    },
     "dnsLabelPrefix": {
       "type": "string",
       "metadata": {
@@ -77,10 +71,7 @@
     "publicNetworkSecurityGroupsName": "KAVEPublicSecurityGroup",
     "KAVEStorageAccountContainerName": "vhds",
     "KAVEStdStorageType": "Standard_LRS",
-    "KAVEPrmStorageType": "Premium_LRS",
     "KAVEStdStorageKind": "Storage",
-    "KAVEPrmStorageKind": "BlobStorage",
-    "KAVEPrmStorageAccessTier": "Cool",
     "publicIPAddressName": "KAVEPublicIP",
     "publicIPAddressType": "Static",
     "extensionName": "/setup",
@@ -129,23 +120,6 @@
         "name": "[variables('KAVEStdStorageType')]"
       },
       "kind": "[variables('KAVEStdStorageKind')]"
-    },
-    {
-      "name": "[parameters('saPremiumName')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[variables('location')]",
-      "apiVersion": "[variables('apiVersionStorage')]",
-      "dependsOn": [],
-      "properties": {
-        "accessTier": "[variables('KAVEPrmStorageAccessTier')]"
-      },
-      "tags": {
-        "displayName": "saKAVE01Premium"
-      },
-      "sku": {
-        "name": "[variables('KAVEPrmStorageType')]"
-      },
-      "kind": "[variables('KAVEPrmStorageKind')]"
     },
     {
       "name": "KAVEnetwork",
