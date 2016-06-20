@@ -84,7 +84,7 @@
     "publicIPAddressName": "KAVEPublicIP",
     "publicIPAddressType": "Static",
     "extensionName": "/setup",
-    "branchName": "master",
+    "branchName": "AmbariOnlyTemplate",
     "templateName": "tmpl-ambari-only",
     "contentHost": "raw.githubusercontent.com",
     "mainHost": "github.com",
