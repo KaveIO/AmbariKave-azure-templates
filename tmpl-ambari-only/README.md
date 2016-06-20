@@ -1,4 +1,4 @@
-# HDP with CI 
+# Single Ambari machine
 ## Deployment
 1. Create a new resource group in a region that allows premium storage. Nowadays, it is available in almost all regions ([Azure Regions Services](https://azure.microsoft.com/en-us/regions/#services) )
 
