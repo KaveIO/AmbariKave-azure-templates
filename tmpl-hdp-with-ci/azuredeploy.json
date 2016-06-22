@@ -147,7 +147,7 @@
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
-		"branchName": "master",
+		"branchName": "CheckFix",
                 "templateName": "tmpl-hdp-with-ci",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
