@@ -49,7 +49,7 @@ set_v4_only() {
 function install_packages {
     yum install -y epel-release
     yum clean all
-    
+
     yum install -y sshpass pdsh
 
     yum install -y rpcbind
