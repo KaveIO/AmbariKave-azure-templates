@@ -42,8 +42,8 @@ setup_vnc() {
         echo \"$PASS\" | vncpasswd -f > \"$vncpasswd\"; chmod 600 \"$vncpasswd\"
     "
     echo "VNCSERVERS=\"1:$USER\"" >> /etc/sysconfig/vncservers
-    chkconfig vncserver on 
-    service vncserver start 
+    chkconfig vncserver on
+    service vncserver start
 }
 
 extradisknode_setup
