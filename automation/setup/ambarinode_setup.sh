@@ -113,9 +113,9 @@ function enable_kaveadmin {
         sleep 60
         echo "Waiting until FreeIPA is up and running..."
     done
-    cat /root/admin-password | su admin -c kinit admin
-    su admin -c "
-        ipa user-mod kaveadmin --password<<EOF
+    cat /root/admin-password | kinit admin
+    su -c "
+        ipa user-mod $USER --password<<EOF
         $PASS
         $PASS
 EOF"
