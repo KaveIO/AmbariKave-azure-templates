@@ -119,6 +119,7 @@ EOF"
 
 function check_installation {
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way.
+    sleep 600
     while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
 	echo $INSTALLATION_STATUS
 	sleep 5
