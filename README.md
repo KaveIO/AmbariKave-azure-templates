@@ -1,17 +1,11 @@
 # Ambarikave-azure-templates: Public KAVE on Azure templates
 
-In this repo we contain publishable azure deployments of the AmbariKave. These deployments can be run via their *Deploy to Azure* buttons or via the azure-cli.
+This repository contains publishable [Azure](https://azure.microsoft.com/) deployments of the [KAVE](http://kave.io). These deployments can be run via their *Deploy to Azure* buttons or via the azure-cli. Navigate to the specific deployment folders on github to be able to deploy them directly.
 
 Supported templates currently are: 
 
- - HDP with CI stack.
-
-## Overview
-
-This repository contains the source code necessary for the automated deployment of [KAVE](http://kave.io) on [Azure](https://azure.microsoft.com/). The environments are provisionable via a deploy button; visualization is one click away too: 
-
-![deploy](http://azuredeploy.net/deploybutton.png)
-![visualize](http://armviz.io/visualizebutton.png)
+ - [Ambari only](https://github.com/KaveIO/AmbariKave-azure-templates/tree/master/tmpl-ambari-only)
+ - [HDP with CI stack](https://github.com/KaveIO/AmbariKave-azure-templates/tree/master/tmpl-hdp-with-ci)
 
 ## For developers
 
