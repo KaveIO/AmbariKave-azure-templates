@@ -15,7 +15,7 @@ WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
-SERVICES_URL="http://localhost:8080/api/v1/clusters/cluster/services"
+SERVICES_URL="http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/services"
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -114,7 +114,7 @@ function enable_kaveadmin {
         $PASS
 EOF" 
     #Let the changes sink into the whole ipa cluster...
-    sleep 560
+    sleep 180
 }
 
 function check_installation {
