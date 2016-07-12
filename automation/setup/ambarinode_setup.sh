@@ -86,14 +86,20 @@ function blueprint_deploy {
 }
 
 function installation_status {
-    local installation_status_message=$(curl --netrc "http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/*" 2> /dev/null)
+    local installation_status_message=$(curl --netrc "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/requests/1" 2> /dev/null)
     local exit_status=$?
 
     if [ $exit_status -ne 0 ]; then
         return $exit_status
     else
-        if [[ "$installation_status_message" =~ "\"CRITICAL\" : 0" ]]; then
+        if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then
             INSTALLATION_STATUS="done"
+	elif [[ "$installation_status_message" =~ "\"request_status\" : \"FAILED\"" ]]; then
+            INSTALLATION_STATUS="failed"
+	elif [[ "$installation_status_message" =~ "\"request_status\" : \"ABORTED\"" ]]; then
+            INSTALLATION_STATUS="aborted"
+	elif [[ "$installation_status_message" =~ "\"status\" : 404" ]]; then
+            INSTALLATION_STATUS="wrongURI"
         else
             INSTALLATION_STATUS="working"
         fi
@@ -122,7 +128,7 @@ function check_installation {
     sleep 600
     while installation_status && [ $INSTALLATION_STATUS = "working" ] ; do
 	echo $INSTALLATION_STATUS
-	sleep 5
+	sleep 30
     done
 
     if [ "$INSTALLATION_STATUS" = "done" ]; then
