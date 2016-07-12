@@ -88,7 +88,7 @@ function blueprint_deploy {
 function installation_status {
     local installation_status_message=$(curl --netrc "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/requests/1" 2> /dev/null)
     local exit_status=$?
-
+    echo $installation_status_message
     if [ $exit_status -ne 0 ]; then
         return $exit_status
     else
@@ -103,6 +103,7 @@ function installation_status {
         else
             INSTALLATION_STATUS="working"
         fi
+	echo $INSTALLATION_STATUS
         return 0
     fi
 }
