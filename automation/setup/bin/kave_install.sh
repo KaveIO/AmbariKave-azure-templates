@@ -3,7 +3,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-VERSION=${1:-2.0-Beta}
+VERSION=${1:-2.1-Beta}
 WORKING_DIR=${2:-/root/kavesetup}
 
 function patch_kave {
@@ -12,7 +12,7 @@ function patch_kave {
     cp "$WORKING_DIR"/contents/automation/patch/freeipa.py "$WORKING_DIR"/AmbariKave-$VERSION/src/HDP/2.4.KAVE/services/FREEIPA/package/scripts
 }
 
-wget "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$WORKING_DIR/$VERSION.zip"
+wget -c --tries=0 --read-timeout=60 "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$WORKING_DIR/$VERSION.zip"
 
 unzip "$WORKING_DIR/$VERSION.zip" -d "$WORKING_DIR"
 
