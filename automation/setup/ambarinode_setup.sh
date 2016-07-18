@@ -21,7 +21,9 @@ function anynode_setup {
 }
 
 function csv_hosts {
+    echo $HOSTS
     CSV_HOSTS=$(echo "$HOSTS" | tr ' ' ,)
+    echo "csv host function: "${CSV_HOSTS}
 }
 
 function download_blueprint {
