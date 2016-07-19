@@ -143,10 +143,10 @@ localize_cluster_file
 
 initialize_blueprint
 
-kave_install
+#kave_install
 
-patch_ipa
+#patch_ipa
 
-wait_for_ambari
+#wait_for_ambari
 
-blueprint_deploy
+#blueprint_deploy
