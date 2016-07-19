@@ -97,6 +97,7 @@
     "AmbariNodeDiskName": "[parameters('AmbariNodeName')]",
     "AmbariNicName": "[concat(parameters('AmbariNodeName'), 'NiC')]",
     "GatewayNicName": "[concat(parameters('GatewayNodeName'), 'NiC')]",
+    "CiNicName": "[concat(parameters('CiNodeName'), 'NiC')]",
     "KAVEVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'KAVEnetwork')]",
     "KAVESubnetRef": "[concat(variables('KAVEVnetID'), '/subnets/', variables('KAVEnetworkSubnet1Name'))]",
     "publicNetworkSecurityGroupsName": "KAVEPublicSecurityGroup",
