@@ -69,41 +69,6 @@
       "type": "string",
       "defaultValue": "Standard_D2_v2"
     },
-    "NnoNodeName": {
-      "type": "string",
-      "defaultValue": "nno",
-      "minLength": 1,
-      "metadata": {
-        "description": "The base machine name of the Namenodes."
-      }
-    },
-    "NnoNodeSize": {
-      "type": "string",
-      "defaultValue": "Standard_D4_v2"
-    },
-    "NnoNodeCount": {
-      "type": "int",
-      "defaultValue": 2
-    },
-    "DataNodeName": {
-      "type": "string",
-      "defaultValue": "data",
-      "minLength": 1,
-      "metadata": {
-        "description": "The base machine name of the Datanodes."
-      }
-    },
-    "DataNodeSize": {
-      "type": "string",
-      "defaultValue": "Standard_DS4_v2"
-    },
-    "DataNodeCount": {
-      "type": "int",
-      "defaultValue": 3,
-      "metadata": {
-        "description": "The number of datanodes to spawn for this cluster"
-      }
-    },
     "KAVENetworkPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/16"
