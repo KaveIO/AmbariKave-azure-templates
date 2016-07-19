@@ -86,18 +86,18 @@ function disable_selinux {
     sed -i s/SELINUX=enforcing/SELINUX=disabled/g /etc/selinux/config
 }
 
-setup_repo
+#setup_repo
 
-patch_yum
+#patch_yum
 
-install_packages
+#install_packages
 
 change_rootpass
 
-configure_swap
+#configure_swap
 
-disable_iptables
+#disable_iptables
 
-disable_selinux
+#disable_selinux
 
 
