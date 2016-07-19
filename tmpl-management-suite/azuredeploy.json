@@ -136,9 +136,7 @@
     "nodes": "'ambari gate ci'",
     "version": "2.1-Beta",
     "gateExtraDisk": "/dev/sdc",
-    "dataNodeExtraDisk": "/dev/sdc",
-    "gateMountPoint": "/data",
-    "dataNodeMountPoint": "/hadoop"
+    "gateMountPoint": "/data"
   },
   "resources": [
     {
