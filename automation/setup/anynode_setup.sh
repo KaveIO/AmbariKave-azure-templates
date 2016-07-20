@@ -56,7 +56,7 @@ function install_packages {
 
 function change_name {
     local sname=`hostname -s`
-    echo `hostname -d` >> domain.name
+    echo `hostname -d` >> $WORKING_DIR/domain.name
     python $AUTOMATION_DIR/setup/bin/rename_me.py $sname "akave.io"
 }
 
