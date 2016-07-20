@@ -56,7 +56,8 @@ function install_packages {
 
 function change_name {
     local sname=`hostname -s`
-    python $AUTOMATION_DIR/setup/bin rename_me.py sname "azurekave.io"
+    echo `hostname -d` >> domain.name
+    python $AUTOMATION_DIR/setup/bin/rename_me.py $sname "akave.io"
 }
 
 function change_rootpass {

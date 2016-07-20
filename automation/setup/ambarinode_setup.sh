@@ -50,7 +50,8 @@ function distribute_keys {
 
 function customize_hosts {
     $BIN_DIR/create_hostsfile.sh "$WORKING_DIR" "$HOSTS"
-
+    DOMAIN=`more domain.name`
+    sed -i 's/'${DOMAIN}'/akave\.io/g' $WORKING_DIR/hosts
     pdcp -w "$CSV_HOSTS" "$WORKING_DIR/hosts" /etc/hosts
 }
 
