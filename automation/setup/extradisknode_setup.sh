@@ -23,4 +23,4 @@ function initialize_data_disk {
 
 anynode_setup
 
-#initialize_data_disk
+initialize_data_disk
