@@ -54,6 +54,11 @@ function install_packages {
     yum install -y rpcbind
 }
 
+function change_name {
+    local sname=`hostname -s`
+    python $AUTOMATION_DIR/setup/bin rename_me.py sname "azurekave.io"
+}
+
 function change_rootpass {
     echo root:$PASS | chpasswd
 }
@@ -86,18 +91,20 @@ function disable_selinux {
     sed -i s/SELINUX=enforcing/SELINUX=disabled/g /etc/selinux/config
 }
 
-#setup_repo
+setup_repo
 
-#patch_yum
+change_name
 
-#install_packages
+patch_yum
+
+install_packages
 
 change_rootpass
 
-#configure_swap
+configure_swap
 
-#disable_iptables
+disable_iptables
 
-#disable_selinux
+disable_selinux
 
 

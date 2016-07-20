@@ -129,19 +129,19 @@ function installation_status {
 
 anynode_setup
 
-#csv_hosts
+csv_hosts
 
-#download_blueprint
+download_blueprint
 
-#define_bindir
+define_bindir
 
-#distribute_keys
+distribute_keys
 
-#customize_hosts
+customize_hosts
 
-#localize_cluster_file
+localize_cluster_file
 
-#initialize_blueprint
+initialize_blueprint
 
 #kave_install
 
