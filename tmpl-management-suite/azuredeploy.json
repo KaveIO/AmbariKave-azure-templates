@@ -520,7 +520,7 @@
           "fileUris": "[split(concat(variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI'),' ',variables('anyNodeSetupURI')), ' ')]"
         },
         "protectedSettings": {
-          "commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'),' ',variables('destDir'),' ',variables('gateSwapSize'),' ',variables('workingDir'),' ',variables('initHDFS))]"
+          "commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'),' ',variables('destDir'),' ',variables('gateSwapSize'),' ',variables('workingDir'),' ',variables('initHDFS'))]"
         }
       }
     },
