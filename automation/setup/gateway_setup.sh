@@ -10,6 +10,7 @@ MOUNT=$5
 DESTDIR=${6:-contents}
 SWAP_SIZE=${7:-10g}
 WORKING_DIR=${8-/root/kavesetup}
+HDFS_SETUP=${9:-true}
 
 function extradisknode_setup {
     chmod +x "$DIR/extradisknode_setup.sh"
@@ -18,7 +19,9 @@ function extradisknode_setup {
 }
 
 function post_installation {
-    initialize_hdfs
+    if [ "$HDFS_SETUP" = true ] ; then
+	initialize_hdfs
+    fi
     setup_vnc
 }
 

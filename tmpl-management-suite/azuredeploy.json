@@ -137,7 +137,12 @@
     "nodes": "'ambari gate ci'",
     "version": "2.1-Beta",
     "gateExtraDisk": "/dev/sdc",
-    "gateMountPoint": "/data"
+    "gateMountPoint": "/data",
+    "destDir": "contents",
+    "gateSwapSize" : "10g",
+    "workingDir" : "/root/kavesetup",
+    "initHDFS" : "false"
+    
   },
   "resources": [
     {
@@ -515,7 +520,7 @@
           "fileUris": "[split(concat(variables('extraDiskNodeSetupURI'),' ',variables('gatewaySetupURI'),' ',variables('anyNodeSetupURI')), ' ')]"
         },
         "protectedSettings": {
-          "commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'))]"
+          "commandToExecute": "[concat(variables('commandToExecuteGateway'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('gateExtraDisk'),' ',variables('gateMountPoint'),' ',variables('destDir'),' ',variables('gateSwapSize'),' ',variables('workingDir'),' ',variables('initHDFS))]"
         }
       }
     },
