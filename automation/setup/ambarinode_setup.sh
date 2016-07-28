@@ -137,18 +137,18 @@ download_blueprint
 
 define_bindir
 
-distribute_keys
+#distribute_keys
 
-customize_hosts
+#customize_hosts
 
-localize_cluster_file
+#localize_cluster_file
 
-initialize_blueprint
+#initialize_blueprint
 
-kave_install
+#kave_install
 
 #patch_ipa
 
-wait_for_ambari
+#wait_for_ambari
 
-blueprint_deploy
+#blueprint_deploy
