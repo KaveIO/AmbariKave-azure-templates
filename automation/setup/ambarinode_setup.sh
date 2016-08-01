@@ -104,7 +104,7 @@ function blueprint_deploy {
 }
 
 function installation_status {
-    local installation_status_message=$(curl --user admin:admin "http://localhost:8080/api/v1/clusters/cluster/?fields=alerts_summary/*" 2> /dev/null)
+    local installation_status_message=$(curl --user admin:admin "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/?fields=alerts_summary/*" 2> /dev/null)
     local exit_status=$?
 
     if [ $exit_status -ne 0 ]; then
