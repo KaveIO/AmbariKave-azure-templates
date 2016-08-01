@@ -85,7 +85,9 @@ function wait_for_ambari {
 }
 
 function blueprint_deploy {
-    $BIN_DIR/blueprint_deploy.sh "$VERSION" "${KAVE_BLUEPRINT%.*}" "${KAVE_CLUSTER%.*}" "$WORKING_DIR"
+    #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
+    local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
+    until $command; do sleep 10; done
 
     # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
     sleep 600
