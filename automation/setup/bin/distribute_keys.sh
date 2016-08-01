@@ -12,5 +12,5 @@ ssh-keygen -f "$key" -t rsa -N ''
 echo StrictHostKeyChecking$'\t'no > ~/.ssh/config 
 
 for NODE in $@; do
-    sshpass -p "$PASS" ssh-copy-id -i "$key" root@"$NODE"
+    until sshpass -p "$PASS" ssh-copy-id -i "$key" root@"$NODE"; do sleep 150; done
 done
