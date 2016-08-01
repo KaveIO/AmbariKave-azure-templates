@@ -14,6 +14,7 @@ SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
+
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
     
@@ -116,6 +117,17 @@ function installation_status {
         fi
         return 0
     fi
+}
+
+function enable_kaveadmin {
+    cat /root/admin-password | kinit admin
+    su -c "
+        ipa user-mod $USER --password<<EOF
+        $PASS
+        $PASS
+EOF"
+    # let the changes propagate through the cluster
+    sleep 120
 }
 
 anynode_setup
