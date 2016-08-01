@@ -46,6 +46,13 @@ setup_vnc() {
     service vncserver start
 }
 
+setup_xrdp() {
+    yum install -y xrdp
+    sed -i "s/tsusers/$USER/" /etc/xrdp/sesman.ini
+    chkconfig xrdp on
+    service xrdp start
+}
+
 extradisknode_setup
 
 #Why in the background? The ambari node depends as a resource on the rest of the nodes. Whether for bug or feature, Azure waits for the creation of the dependent VMs, not for their setups, to complete. In case this behavior is corrected in the future, and this should be the case IMHO, this script will return and give the greenlight to the provision of the ambari node.
