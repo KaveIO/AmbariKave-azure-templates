@@ -278,7 +278,7 @@
 			"location": "[variables('location')]",
 			"copy": {
 				"name": "NnoNicLoop",
-				"count": "[variables('NnoNodeCont')]"
+				"count": "[variables('NnoNodeCount')]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]"
