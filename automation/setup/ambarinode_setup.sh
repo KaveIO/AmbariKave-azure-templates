@@ -14,6 +14,8 @@ SWAP_SIZE=${9:-10g}
 WORKING_DIR=${10:-/root/kavesetup}
 CLUSTER_NAME=${11:-cluster}
 
+CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
+CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -87,46 +89,35 @@ function wait_for_ambari {
 function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
-    until $command; do sleep 10; done
-
-    # The installation will take quite a while. We'll sleep for a bit before we even start checking the installation status. This lets us be certain that the installation is well under way. 
-    sleep 600
-
-    while installation_status && [ $INSTALLATION_STATUS = "working" ] ;  do
-        echo $INSTALLATION_STATUS
-        sleep 30
+    until $command; do 
+	echo "Blueprint installation failed, retrying..."
+	sleep 10
     done
-
-    if [ "$INSTALLATION_STATUS" = "done" ]; then
-       echo "No Criticals detected. The installation appears to be successful!"
-    else
-       echo "Installation loop broken, installation possibly failed. Exiting."
-       echo $INSTALLATION_STATUS
-       exit 255
-    fi
 }
 
-function installation_status {
-    local installation_status_message=$(curl --netrc "http://localhost:8080/api/v1/clusters/$CLUSTER_NAME/requests/1" 2> /dev/null)
-    local exit_status=$?
-
-    if [ $exit_status -ne 0 ]; then
-        return $exit_status
-    else
-	if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then
-             INSTALLATION_STATUS="done"
-        elif [[ "$installation_status_message" =~ "\"request_status\" : \"FAILED\"" ]]; then
-            INSTALLATION_STATUS="failed"
-        elif [[ "$installation_status_message" =~ "\"request_status\" : \"ABORTED\"" ]]; then
-            INSTALLATION_STATUS="aborted"
-        elif [[ "$installation_status_message" =~ "\"status\" : 404" ]]; then
-            INSTALLATION_STATUS="wrongURI"
-        else
-            INSTALLATION_STATUS="working"
-        fi
-        return 0
-    fi
+function wait_on_deploy() {
+    until wait_on_deploy_impl; do
+	echo "Ambari tasks taking too long, restarting the Ambari cluster..."
+	service ambari-server restart
+	sleep 120
+	pdsh -w "$CSV_HOSTS" "service ambari-agent restart"
+	sleep 120
+	done
 }
+
+wait_on_deploy_impl() {
+    #We start only after the regular blueprint deployment is done, and we are done when there are no running or scheduled requests.
+    sleep 300
+    local command="$CURL_AUTH_COMMAND"
+    local count=150
+    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -ne 0; do
+	((count--))
+	sleep 15
+	echo "Waiting for background tasks in Ambari to complete..."
+    done
+    test $count -ne 0
+}
+
 
 function enable_kaveadmin {
     cat /root/admin-password | kinit admin
@@ -162,5 +153,7 @@ patch_ipa
 wait_for_ambari
 
 blueprint_deploy
+
+wait_on_deploy
 
 enable_kaveadmin
