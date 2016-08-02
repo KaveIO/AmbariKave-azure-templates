@@ -413,7 +413,7 @@
 		}
 		},{
 		"apiVersion": "[variables('apiVersionCompute')]",
-		"name": "[parameters('CiNodeName')]",
+		"name": "[variables('CiNodeName')]",
 		"type": "Microsoft.Compute/virtualMachines",
 		"location": "[variables('location')]",
 		"dependsOn": [
