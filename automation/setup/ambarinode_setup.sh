@@ -162,3 +162,5 @@ patch_ipa
 wait_for_ambari
 
 blueprint_deploy
+
+enable_kaveadmin
