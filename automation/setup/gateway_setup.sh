@@ -20,12 +20,13 @@ function extradisknode_setup {
 function post_installation {
     setup_vnc
     setup_xrdp
-    remove_gnomepackagekit
-    initialize_hdfs
+    remove_gnomepackagekit &
+    initialize_hdfs &
 }
 
 setup_vnc() {
-    until which vncserver vncpasswd 2>&-; do
+    yum install -y vnc-server
+    until which vncserver 2>&- && which vncpasswd 2>&-; do
 	sleep 60
 	echo "Waiting until VNC is installed..."
     done
@@ -48,7 +49,7 @@ setup_xrdp() {
 }
 
 remove_gnomepackagekit() {
-    yum remove -y PackageKit
+    until yum remove -y PackageKit; do sleep 60; done
 }
 
 initialize_hdfs() {
