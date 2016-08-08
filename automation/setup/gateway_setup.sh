@@ -25,7 +25,7 @@ function post_installation {
 }
 
 setup_vnc() {
-    yum install -y vnc-server
+    yum install -y tigervnc-server
     until which vncserver 2>&- && which vncpasswd 2>&-; do
 	sleep 60
 	echo "Waiting until VNC is installed..."
