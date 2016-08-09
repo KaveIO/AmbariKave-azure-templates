@@ -107,16 +107,17 @@ function blueprint_deploy {
 	echo $blueprint_trials" deployment trials remaining"
 	pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
 	cd "$WORKING_DIR/AmbariKave-$VERSION"
-	service ambari-server stop
-	su -c "
-            dev/clean.sh<<EOF
-            y
-EOF"
+	echo "y" | dev/clean.sh 
 	kave_install
 	blueprint_deploy
     else
-	echo "deployment successful"
-	return 0
+	if [ $blueprint_trials -ne 0 ]; then
+	    echo "deployment successful"
+	    return 0
+	else
+	    echo "It was not possible to deploy requested blueprint on your cluster. Please check if all machines in your cluster are running normally."
+	    return 3
+	fi
     fi
 }
 
