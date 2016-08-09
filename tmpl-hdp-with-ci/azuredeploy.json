@@ -48,7 +48,7 @@
 	        "KAVECentOSVersion": "6.5",
 	        "dnsLabelPrefix" : "[parameters('ClusterName')]",
 	        "saPremiumName" : "[concat(parameters('ClusterName'),'p')]",
-	        "saName" : "[concat(parameters('ClusterName'))]",
+	        "saName" : "[parameters('ClusterName')]",
 		"location": "[resourceGroup().location]",
 		"apiVersionStorage": "2016-01-01",
 		"apiVersionNetwork": "2016-03-30",
