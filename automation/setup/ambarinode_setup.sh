@@ -115,7 +115,7 @@ function blueprint_deploy {
 	    echo "deployment successful"
 	    return 0
 	else
-	    echo "It was not possible to deploy requested blueprint on your cluster. Please check if all machines in your cluster are running normally."
+	    (>&2 echo "It was not possible to deploy requested blueprint on your cluster. Please check if all machines in your cluster are running normally.")
 	    return 3
 	fi
     fi
