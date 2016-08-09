@@ -115,7 +115,7 @@
 		"dataNodeMountPoint": "/hadoop"
 	},
 	"resources": [{
-			"name": "[parameters('saName')]",
+			"name": "[variables('saName')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionStorage')]",
