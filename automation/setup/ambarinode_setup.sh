@@ -108,9 +108,10 @@ function blueprint_deploy {
 	pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
 	cd "$WORKING_DIR/AmbariKave-$VERSION"
 	service ambari-server stop
-	su -c "dev/clean.sh<<EOF
-> y
-> EOF"
+	su -c "
+            dev/clean.sh<<EOF
+            y
+EOF"
 	kave_install
 	blueprint_deploy
     else
