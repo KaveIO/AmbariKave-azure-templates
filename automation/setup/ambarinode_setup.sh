@@ -86,19 +86,25 @@ function wait_for_ambari {
     done
 }
 
+blueprint_trials=5
+
 function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
     # do not try more than 10 times before trying to do something else
     local count=10 
+    command="echo 'dummy command...';false"
     while $command && test $count -ne 0; do 
 	((count--))
 	echo "Blueprint installation failed, retrying..."
+	echo "DEBUG: count="$count
 	sleep 30
     done
     # try to re-install ambari in case deployment was not successful
-    if [ $count -eq 0 ]; then
+    if [ $count -eq 0 ] && [ $blueprint_trials -ne 0 ]; then
+	((blueprint_trials--))
 	echo "Blueprint deployment unsucessful. Reinstalling ambari server and retrying the deployment..."
+	echo $blueprint_trials" deployment trials remaining"
 	pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
 	cd "$WORKING_DIR/AmbariKave-$VERSION"
 	su -c "dev/clean.sh<<EOF
@@ -171,6 +177,6 @@ wait_for_ambari
 
 blueprint_deploy
 
-wait_on_deploy
+#wait_on_deploy
 
-enable_kaveadmin
+#enable_kaveadmin
