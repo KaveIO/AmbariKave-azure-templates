@@ -9,10 +9,10 @@ HOSTS="localhost $4"
 VERSION=$5
 KAVE_BLUEPRINT_URL=$6
 KAVE_CLUSTER_URL=$7
-DESTDIR=${8:-contents}
-SWAP_SIZE=${9:-10g}
-WORKING_DIR=${10:-/root/kavesetup}
-CLUSTER_NAME=${11:-cluster}
+DESTDIR=${9:-contents}
+SWAP_SIZE=${10:-10g}
+WORKING_DIR=${11:-/root/kavesetup}
+CLUSTER_NAME=${8:-cluster}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"

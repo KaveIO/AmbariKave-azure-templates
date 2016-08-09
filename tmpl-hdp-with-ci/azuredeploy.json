@@ -15,6 +15,12 @@
 				"description": "Password of the admin user"
 			}
 		},
+	         "ClusterName": {
+                        "type": "string",
+                        "metadata": {
+                                "description": "Unique name for the KAVE Cluster wich will be used for public hostname and storage account name"
+                        }
+                },
 		"saName": {
 			"type": "string",
 			"metadata": {
@@ -623,7 +629,7 @@
 					"fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('ambariNodeSetupURI')), ' ')]"
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat(variables('commandToExecuteAmbariNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nodes'),' ',variables('version'),' ',variables('kaveBlueprint'),' ',variables('kaveCluster'))]"
+					"commandToExecute": "[concat(variables('commandToExecuteAmbariNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nodes'),' ',variables('version'),' ',variables('kaveBlueprint'),' ',variables('kaveCluster'),' ',parameters('ClusterName'))]"
 				}
 
 			}
