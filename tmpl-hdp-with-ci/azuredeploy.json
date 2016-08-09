@@ -21,24 +21,6 @@
                                 "description": "Unique name for the KAVE Cluster wich will be used for public hostname and storage account name"
                         }
                 },
-		"saName": {
-			"type": "string",
-			"metadata": {
-				"description": "Unique name for the azure storage account wich will be used for regular storage"
-			}
-		},
-		"saPremiumName": {
-			"type": "string",
-			"metadata": {
-				"description": "Unique name for the azure storage account wich will be used for premium storage"
-			}
-		},
-		"dnsLabelPrefix": {
-			"type": "string",
-			"metadata": {
-				"description": "Unique DNS Name prefix for the Public IP used to access the Gateway."
-			}
-		},
 		"AmbariNodeSize": {
 			"type": "string",
 			"defaultValue": "Standard_D2_v2"
@@ -58,30 +40,21 @@
 		"DataNodeSize": {
 			"type": "string",
 			"defaultValue": "Standard_DS4_v2"
-		},
-		"KAVENetworkPrefix": {
-			"type": "string",
-			"defaultValue": "10.0.0.0/16"
-		},
-		"KAVENetworkSubnet": {
-			"type": "string",
-			"defaultValue": "10.0.0.0/24"
-		},
-		"KAVECentOSVersion": {
-			"type": "string",
-			"defaultValue": "6.5",
-			"allowedValues": [
-				"6.5"
-			]
 		}
 	},
 	"variables": {
+	        "KAVENetworkPrefix": "10.0.0.0/16",
+ 	        "KAVENetworkSubnet": "10.0.0.0/24",
+	        "KAVECentOSVersion": "6.5",
+	        "dnsLabelPrefix" : "[parameters('ClusterName')]",
+	        "saPremiumName" : "[concat(parameters('ClusterName'),'p')]",
+	        "saName" : "[concat(parameters('ClusterName'))]"
 		"location": "[resourceGroup().location]",
 		"apiVersionStorage": "2016-01-01",
 		"apiVersionNetwork": "2016-03-30",
 		"apiVersionCompute": "2016-03-30",
 		"KAVEnetworkSubnet1Name": "Subnet-1",
-		"KAVEnetworkSubnet1Prefix": "[parameters('KAVENetworkSubnet')]",
+		"KAVEnetworkSubnet1Prefix": "[variables('KAVENetworkSubnet')]",
 		"KAVEImagePublisher": "OpenLogic",
 		"KAVEImageOffer": "CentOS",
 	        "Comment1": "If you change the node modify the \"nodes\" variable below too",
@@ -155,7 +128,7 @@
 			},
 			"kind": "[variables('KAVEStdStorageKind')]"
 		}, {
-			"name": "[parameters('saPremiumName')]",
+			"name": "[variables('saPremiumName')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionStorage')]",
@@ -182,7 +155,7 @@
 			"properties": {
 				"addressSpace": {
 					"addressPrefixes": [
-						"[parameters('KAVENetworkPrefix')]"
+						"[variables('KAVENetworkPrefix')]"
 					]
 				},
 				"subnets": [{
@@ -200,7 +173,7 @@
 			"properties": {
 				"publicIPAllocationMethod": "[variables('publicIPAddressType')]",
 				"dnsSettings": {
-					"domainNameLabel": "[parameters('dnsLabelPrefix')]"
+					"domainNameLabel": "[variables('dnsLabelPrefix')]"
 				}
 			}
 		}, {
@@ -390,7 +363,7 @@
 				"imageReference": {
 					"publisher": "[variables('KAVEImagePublisher')]",
 					"offer": "[variables('KAVEImageOffer')]",
-					"sku": "[parameters('KAVECentOSVersion')]",
+					"sku": "[variables('KAVECentOSVersion')]",
 					"version": "latest"
 				},
 			    "dataDisks": [{
@@ -442,7 +415,7 @@
 				"imageReference": {
 					"publisher": "[variables('KAVEImagePublisher')]",
 					"offer": "[variables('KAVEImageOffer')]",
-					"sku": "[parameters('KAVECentOSVersion')]",
+					"sku": "[variables('KAVECentOSVersion')]",
 					"version": "latest"
 				},
 				"osDisk": {
@@ -490,7 +463,7 @@
 					"imageReference": {
 						"publisher": "[variables('KAVEImagePublisher')]",
 						"offer": "[variables('KAVEImageOffer')]",
-						"sku": "[parameters('KAVECentOSVersion')]",
+						"sku": "[variables('KAVECentOSVersion')]",
 						"version": "latest"
 					},
 					"osDisk": {
@@ -519,7 +492,7 @@
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
-				"[concat('Microsoft.Storage/storageAccounts/', parameters('saPremiumName'))]",
+				"[concat('Microsoft.Storage/storageAccounts/', variables('saPremiumName'))]",
 				"DataNicLoop"
 			],
 			"tags": {
@@ -538,7 +511,7 @@
 					"imageReference": {
 						"publisher": "[variables('KAVEImagePublisher')]",
 						"offer": "[variables('KAVEImageOffer')]",
-						"sku": "[parameters('KAVECentOSVersion')]",
+						"sku": "[variables('KAVECentOSVersion')]",
 						"version": "latest"
 					},
 					"dataDisks": [{
@@ -546,7 +519,7 @@
 						"diskSizeGB": "1000",
 						"lun": 0,
 						"vhd": {
-							"uri": "[concat('http://', parameters('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', variables('DataNodeName'), copyIndex(), 'disk1', '.vhd')]"
+							"uri": "[concat('http://', variables('saPremiumName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', variables('DataNodeName'), copyIndex(), 'disk1', '.vhd')]"
 						},
 						"createOption": "Empty"
 					}],
@@ -595,7 +568,7 @@
 					"imageReference": {
 						"publisher": "[variables('KAVEImagePublisher')]",
 						"offer": "[variables('KAVEImageOffer')]",
-						"sku": "[parameters('KAVECentOSVersion')]",
+						"sku": "[variables('KAVECentOSVersion')]",
 						"version": "latest"
 					},
 					"osDisk": {
