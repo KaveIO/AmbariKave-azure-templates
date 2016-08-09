@@ -92,7 +92,7 @@ function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
     # do not try more than 10 times before trying to do something else
-    local count=10 
+    local count=3 
     command="echo 'dummy command...';false"
     while $command && test $count -ne 0; do 
 	((count--))
@@ -107,6 +107,7 @@ function blueprint_deploy {
 	echo $blueprint_trials" deployment trials remaining"
 	pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
 	cd "$WORKING_DIR/AmbariKave-$VERSION"
+	service ambari-server stop
 	su -c "dev/clean.sh<<EOF
 > y
 > EOF"
