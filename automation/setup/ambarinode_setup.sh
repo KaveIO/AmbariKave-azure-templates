@@ -92,8 +92,7 @@ function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
     # do not try more than 10 times before trying to do something else
-    local count=3 
-    command="echo 'dummy command...';false"
+    local count=5 
     while $command && test $count -ne 0; do 
 	((count--))
 	echo "Blueprint installation failed, retrying..."
@@ -180,6 +179,6 @@ wait_for_ambari
 
 blueprint_deploy
 
-#wait_on_deploy
+wait_on_deploy
 
-#enable_kaveadmin
+enable_kaveadmin
