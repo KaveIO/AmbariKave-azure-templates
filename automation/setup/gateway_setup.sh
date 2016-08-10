@@ -48,7 +48,14 @@ setup_xrdp() {
 }
 
 remove_gnomepackagekit() {
-    until yum remove -y PackageKit; do sleep 60; done
+    until yum list installed | grep "PackageKit*" 2>&-; do
+      # querying can take some time, so rather do not do it very often
+      sleep 120
+      echo "Waiting until PackakeKit is installed..."
+    done
+      # sleep just in case the installation is not yet finished
+      sleep 60
+      yum remove -y PackageKit
 }
 
 initialize_hdfs() {
