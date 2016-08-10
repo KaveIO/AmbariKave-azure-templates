@@ -115,7 +115,8 @@
     "dataNodeMountPoint": "/hadoop",
     "DNSNodeSize": "Basic_A0",
     "DNSNodeName": "dns",
-    "DNSNicName": "[concat(variables('DNSNodeName'), 'NiC')]"
+    "DNSNicName": "[concat(variables('DNSNodeName'), 'NiC')]",
+    "DNSIPAddress": "10.0.0.10"
   },
   "resources": [
     {
@@ -285,7 +286,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('DNSIPAddress')]",
               "subnet": {
                 "id": "[variables('KAVESubnetRef')]"
               }
