@@ -506,7 +506,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[parameters('DNSNodeSize')]"
+          "vmSize": "[variables('DNSNodeSize')]"
         },
         "osProfile": {
           "computerName": "[variables('DNSNodeName')]",
