@@ -120,11 +120,13 @@ function blueprint_deploy {
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
     # do not try more than 10 times before trying to do something else
     local count=5 
-    while $command && test $count -ne 0; do 
+    $command
+    while [ $? -ne 0 ] && test $count -ne 0; do 
 	((count--))
 	echo "Blueprint installation failed, retrying..."
 	echo "Deployment attempts #"$count
 	sleep 30
+	$command
     done
     # try to re-install ambari in case deployment was not successful
     if [ $count -eq 0 ] && [ $blueprint_trials -ne 0 ]; then
