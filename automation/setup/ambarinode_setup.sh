@@ -16,8 +16,10 @@ CLUSTER_NAME=${8:-cluster}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
+COMPONENTS_URL="$CLUSTERS_URL/$CLUSTER_NAME/hosts/<HOST>/host_components"
 
 BLUEPRINT_TRIALS=5
+AMBARI_TRIALS=5
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -62,7 +64,7 @@ function localize_cluster_file {
 }
 
 function initialize_blueprint {
-    sed -r s/"<KAVE_ADMIN>"/"$USER"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
+    sed -e s/"<KAVE_ADMIN>"/"$USER"/g -e s/"<KAVE_ADMIN_PASS>"/"$PASS"/g "$KAVE_BLUEPRINT" > "${KAVE_BLUEPRINT%.*}"
 }
 
 function kave_install {
@@ -80,15 +82,38 @@ function patch_ipa {
     #To be fixed in KAVE (installation will refuse to continue if the total string "FQDN + "Certificate Authority" is longer than 64 OR it gives the option to apply this patch
 }
 
+clean() {
+    echo "y" | "$WORKING_DIR/AmbariKave-$VERSION/dev/clean.sh" 
+}
+
+
+
 function wait_for_ambari {
     cp "$BIN_DIR/../.netrc" ~
-    until curl --netrc -fs http://localhost:8080/api/v1/clusters; do
+    local count=5
+    until curl --netrc -fs $CLUSTERS_URL || test $count -eq 0; do
+	((count--))
 	sleep 60
 	echo "Waiting until ambari server is up and running..."
     done
+    if [ $count -eq 0 ] && [ $AMBARI_TRIALS -ne 0]; then
+	((AMBARI_TRIALS--))
+	echo "ambari server is not up and running after 5 minutes waiting: cleaning and reinstalling NOW"
+	echo $AMBARI_TRIALS" ambari installation trials remaining."
+	clean
+	kave_install
+	wait_for_ambari
+    else
+	if [ $AMBARI_TRIALS -ne 0 ]; then
+	    echo "Ambari server is up and running! Enjoy!"
+	    return 0
+	else 
+	    (>&2 echo "It was not possible to install and start Ambari server in 5 trials. See output and error log files for more details.")
+	    return 3
+	fi
+    fi
 }
 
-blueprint_trials=5
 
 function blueprint_deploy {
     #REST connection in deploy_from_blueprint.py can fail, so keep trying till success is reached
@@ -98,17 +123,16 @@ function blueprint_deploy {
     while $command && test $count -ne 0; do 
 	((count--))
 	echo "Blueprint installation failed, retrying..."
-	echo "DEBUG: count="$count
+	echo "Deployment attempts #"$count
 	sleep 30
     done
     # try to re-install ambari in case deployment was not successful
     if [ $count -eq 0 ] && [ $blueprint_trials -ne 0 ]; then
-	((blueprint_trials--))
+	((BLUEPRINT_TRIALS--))
 	echo "Blueprint deployment unsucessful. Reinstalling ambari server and retrying the deployment..."
-	echo $blueprint_trials" deployment trials remaining"
+	echo $BLUEPRINT_TRIALS" deployment trials remaining"
 	pdsh -w "$CSV_HOSTS" "service ambari-agent stop; yum -y erase ambari-agent"
-	cd "$WORKING_DIR/AmbariKave-$VERSION"
-	echo "y" | dev/clean.sh 
+	clean
 	kave_install
 	blueprint_deploy
     else
@@ -147,6 +171,7 @@ wait_on_deploy_impl() {
 
 
 function enable_kaveadmin {
+    sleep 60
     cat /root/admin-password | kinit admin
     su -c "
         ipa user-mod $USER --password<<EOF
@@ -156,6 +181,63 @@ EOF"
     # let the changes propagate through the cluster
     sleep 120
 }
+
+function fix_freeipa_installation {
+    local retries=30
+    local failed=false
+    #The FreeIPA client installation may fail, among other things, because of TGT negotiation failure (https://fedorahosted.org/freeipa/ticket/4808). On the version we are now if this happens the installation is not retried. The idea is to check on all the nodes whether FreeIPA clients are good or not with a simple smoke test, then proceed to retry the installation. A lot of noise is involved, mainly because of Ambari's not-so-shiny API and Kave technicalities.
+    #Should be fixed by upgrading the version of FreeIPA, but unfortunately this is far in the future.
+    #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
+    sleep 120
+    count=5
+    local kinit_pass_file=/root/admin-password
+    local ipainst_lock_file=/root/ipa_client_install_lock_file
+    until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
+	sleep 5
+	((count--))
+    done
+    local kinit_pass=$(cat $kinit_pass_file)
+    local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
+    local ipacommand="ipa 1>/dev/null | wc -l"
+    until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
+	if [ $retries -eq 0 ]; then
+	    (>&2 echo "FreeIPA reinstall retries exceeded, you will have to install the IPA client yourself on the following nodes: '$failed_hosts'. Skipping...")
+	    failed=true
+	    break
+	    fi
+	((retries--))
+	local command="$CURL_AUTH_COMMAND"
+	local url="$COMPONENTS_URL/FREEIPA_CLIENT"
+	pdsh -w "$failed_hosts" "rm -f $ipainst_lock_file; echo no | ipa-client-install --uninstall"
+	pdcp -w "$failed_hosts" /root/robot-admin-password /root
+	local target_hosts=($(echo $failed_hosts | tr , ' '))
+	local install_request='{"RequestInfo":{"context":"Install"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
+	local start_request=$(echo "$install_request" | sed -e "s/Install/Start/g" -e "s/INSTALLED/STARTED/g")
+	for host in ${target_hosts[@]}; do
+	    local host_url=$(echo $url | sed "s/<HOST>/$host/g")
+	    $command DELETE $host_url
+	    sleep 10
+	    $command POST $host_url
+	    sleep 10
+	    $command PUT -d "$install_request" "$host_url"
+	    sleep 10
+	    $command PUT -d "$start_request" "$host_url"
+	    sleep 10
+	    # sometimes the ipa configuration may fail on some nodes. Try to do automatic reconfiguration
+	    local ipamisconfig=`ssh $host $ipacommand`
+	    if [ $ipamisconfig -ne 0 ]; then
+		local domain=`ssh $host "hostname -d"`
+		local ipafixcommand="ipa-client-install -U -d --hostname=$host --domain=$domain --server=ambari.$domain -p admin -w $kinit_pass"
+		ssh $host $ipafixcommand
+            fi
+	done
+	sleep 120
+    done
+    if $failed; then return 3; fi
+    
+    return 0
+}
+
 
 anynode_setup
 
@@ -182,5 +264,7 @@ wait_for_ambari
 blueprint_deploy
 
 wait_on_deploy
+
+fix_freeipa_installation
 
 enable_kaveadmin

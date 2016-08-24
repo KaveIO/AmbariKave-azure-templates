@@ -54,7 +54,7 @@
 	}, {
 		"freeipa": {
 			"ldap_bind_password": "<KAVE_ADMIN_PASS>",
-			"directory_password": "<KAVE_ADMIN_PASS",
+			"directory_password": "<KAVE_ADMIN_PASS>",
 			"initial_users_and_groups": "{\"Users\" : [\"<KAVE_ADMIN>\"], \"Groups\" : {\"admins\" : [\"<KAVE_ADMIN>\"], \"hadoop\" : [\"<KAVE_ADMIN>\"]}}"
 		}
 	}, {
