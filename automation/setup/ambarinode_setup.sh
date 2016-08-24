@@ -17,6 +17,8 @@ CLUSTER_NAME=${8:-cluster}
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
 
+BLUEPRINT_TRIALS=5
+
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
     
