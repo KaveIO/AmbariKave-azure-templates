@@ -21,8 +21,9 @@ COMPONENTS_URL="$CLUSTERS_URL/$CLUSTER_NAME/hosts/<HOST>/host_components"
 
 BLUEPRINT_TRIALS=5
 AMBARI_TRIALS=5
+REINSTALL_TRIALS=5
 
-REQUEST_NUMBER=1
+DEPLOYMENT_SUCCESS=-1 
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -123,16 +124,14 @@ function blueprint_deploy {
     local command="$BIN_DIR/blueprint_deploy.sh $VERSION ${KAVE_BLUEPRINT%.*} ${KAVE_CLUSTER%.*} $WORKING_DIR"
     # do not try more than 10 times before trying to do something else
     local count=5 
-    $command
-    while [ $? -ne 0 ] && test $count -ne 0; do 
+    while ! ($command) && test $count -gt 0; do 
 	((count--))
 	echo "Blueprint installation failed, retrying..."
 	echo "Deployment attempts #"$count
-	sleep 30
-	$command
+	sleep 15
     done
     # try to re-install ambari in case deployment was not successful
-    if [ $count -eq 0 ] && [ $blueprint_trials -ne 0 ]; then
+    if [ $count -eq 0 ] && [ $BLUEPRINT_TRIALS -gt 0 ]; then
 	((BLUEPRINT_TRIALS--))
 	echo "Blueprint deployment unsucessful. Reinstalling ambari server and retrying the deployment..."
 	echo $BLUEPRINT_TRIALS" deployment trials remaining"
@@ -141,7 +140,7 @@ function blueprint_deploy {
 	kave_install
 	blueprint_deploy
     else
-	if [ $blueprint_trials -ne 0 ]; then
+	if [ $BLUEPRINT_TRIALS -gt 0 ]; then
 	    echo "deployment successful"
 	    return 0
 	else
@@ -187,26 +186,69 @@ EOF"
     sleep 120
 }
 
+function check_all_running {
+    echo "checking the state of the deployed components on all hosts"
+    local command=$CURL_AUTH_COMMAND
+    local domain=`hostname -d`
+    for host in ${HOSTS[@]}; do
+	echo "checking host "$host
+	if [ $host = localhost ]; then continue; fi
+	local host=$host.$domain
+	local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
+	local request="$command GET $host_url"
+	local components=($($request | grep "component_name" | awk -F '"' '{print $4}'))
+	for component in ${components[@]}; do
+	    echo "checking component "$component
+	    local check_response=$($request/$component"?fields=HostRoles/state")
+            local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
+	    echo "Its state is "$state
+	    if [ $state = INSTALLED -o $state = INSTALL_FAILED ]; then
+		DEPLOYMENT_SUCCESS=0
+		# fixed in AmbariKave 2.1
+		if [[ $component = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
+	    fi
+	done # loop over components
+    done # loop over hosts
+    if [ $DEPLOYMENT_SUCCESS -eq -1 ]; then
+	echo "All compoments on all hosts are up and running! Hurrah!"
+	DEPLOYMENT_SUCCESS=1
+    fi    
+}
+
 function check_reinstall_restart_all {
     # checks if the deployment request succeeded. If not, triggers re-installation.
-    local installation_status_message=$($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests/1?fields=Requests/request_status" 2> /dev/null)
-    local failed=1
-    if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then failed=0; fi
-    if [ $failed -eq 0 ]; then
-	echo "Congratulations! Everything is working on a first trial!"
-    else 
-	# first pass failed, so now reinstall
-	echo "first pass failed, restarting all installations  and services"
+    if [ $REINSTALL_TRIALS -eq 5 ]; then
+	# first pass
+	local installation_status_message=$($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests/1?fields=Requests/request_status" 2> /dev/null)
+	if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then DEPLOYMENT_SUCCESS=1; fi
+    fi
+
+    while [ $DEPLOYMENT_SUCCESS -ne 1 ] && [$REINSTALL_TRIALS -gt 0]; do
+	# previous attempt failed, so now reinstall
+	((REINSTALL_TRIALS--))
+	echo "previous pass failed, restarting all installations and services"
 	$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh 2>/dev/null
 	# monitor and wait till the deployment finishes
 	wait_on_deploy
-	
-	# # last request number
-	# REQUEST_NUMBER=$($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests" 2>/dev/null | grep "id" | tail -n 1 | awk -F ':' '{print $2}' | awk -F ' ' '{print $1}')
-	# local urllength=`echo "$CLUSTERS_URL/$CLUSTER_NAME/requests" | wc -m`
-	# # first request number
-	# REQUEST_NUMBER_2=$command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests" 2>/dev/null | grep 'href' | grep 'requests/' | awk -F '"' '{print $4}' | sed -n 2p | sed -r 's/^.{$urllength}//'
-	
+	fix_freeipa_installation
+	check_all_running
+	if [ $DEPLOYMENT_SUCCESS -eq 0 ]; then
+	    # we were not successful, try again
+	    DEPLOYMENT_SUCCESS=-1 # reset
+	    check_reinstall_restart_all
+	else
+	    echo "re-installation was successful!"
+	fi
+    done
+
+    if [ $DEPLOYMENT_SUCCESS -eq 1 ]; then
+        echo "Congratulations, your KAVE is up and running"
+        return 0
+    else
+	# TODO: log names of failed hosts and task IDs of failed ambari tasks
+        (>&2 echo "It was not possible to install and start all services. Please check contents of /var/lib/ambari-agent/data/ on failed hosts for more information.")
+        return 3
+    fi	
 }
 
 function fix_freeipa_installation {
@@ -307,5 +349,7 @@ blueprint_deploy
 wait_on_deploy
 
 fix_freeipa_installation
+
+check_reinstall_restart_all
 
 enable_kaveadmin
