@@ -13,6 +13,7 @@ DESTDIR=${9:-contents}
 SWAP_SIZE=${10:-10g}
 WORKING_DIR=${11:-/root/kavesetup}
 CLUSTER_NAME=${8:-cluster}
+IPA_SERVER_NAME=${12:-ambari}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
@@ -20,6 +21,8 @@ COMPONENTS_URL="$CLUSTERS_URL/$CLUSTER_NAME/hosts/<HOST>/host_components"
 
 BLUEPRINT_TRIALS=5
 AMBARI_TRIALS=5
+
+REQUEST_NUMBER=1
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -184,6 +187,28 @@ EOF"
     sleep 120
 }
 
+function check_reinstall_restart_all {
+    # checks if the deployment request succeeded. If not, triggers re-installation.
+    local installation_status_message=$($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests/1?fields=Requests/request_status" 2> /dev/null)
+    local failed=1
+    if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then failed=0; fi
+    if [ $failed -eq 0 ]; then
+	echo "Congratulations! Everything is working on a first trial!"
+    else 
+	# first pass failed, so now reinstall
+	echo "first pass failed, restarting all installations  and services"
+	$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh 2>/dev/null
+	# monitor and wait till the deployment finishes
+	wait_on_deploy
+	
+	# # last request number
+	# REQUEST_NUMBER=$($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests" 2>/dev/null | grep "id" | tail -n 1 | awk -F ':' '{print $2}' | awk -F ' ' '{print $1}')
+	# local urllength=`echo "$CLUSTERS_URL/$CLUSTER_NAME/requests" | wc -m`
+	# # first request number
+	# REQUEST_NUMBER_2=$command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests" 2>/dev/null | grep 'href' | grep 'requests/' | awk -F '"' '{print $4}' | sed -n 2p | sed -r 's/^.{$urllength}//'
+	
+}
+
 function fix_freeipa_installation {
     local retries=30
     local failed=false
@@ -192,6 +217,19 @@ function fix_freeipa_installation {
     #It is important anyway that we start to check after the installation has been tried at least once on all the nodes, so let's check for the locks and sleep for a while anyway.
     sleep 120
     count=5
+    # first check if IPA server is up and running
+    local host=$IPA_SERVER_NAME.`hostname -d`
+    local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
+    local request="$CURL_AUTH_COMMAND GET $host_url/FREEIPA_SERVER?fields=HostRoles/state"
+    local response=$($request)
+    local state=$(echo "$response" | grep "\"state\" :" | awk -F '"' '{print $4}')
+    if [ $state = STARTED ]; then 
+	echo "IPA server started, checking clients..."
+	# continue to the rest of the function
+    else 
+	echo "IPA server is not running, skipping client installation for the moment"
+	return 0
+    fi
     local kinit_pass_file=/root/admin-password
     local ipainst_lock_file=/root/ipa_client_install_lock_file
     until (pdsh -S -w "$CSV_HOSTS" "ls $ipainst_lock_file" && ls $kinit_pass_file 2>&-) || test $count -eq 0; do
@@ -228,8 +266,9 @@ function fix_freeipa_installation {
 	    # sometimes the ipa configuration may fail on some nodes. Try to do automatic reconfiguration
 	    local ipamisconfig=`ssh $host $ipacommand`
 	    if [ $ipamisconfig -ne 0 ]; then
+		# command 'ipa' returned error that can mean misconfiguration
 		local domain=`ssh $host "hostname -d"`
-		local ipafixcommand="ipa-client-install -U -d --hostname=$host --domain=$domain --server=ambari.$domain -p admin -w $kinit_pass"
+		local ipafixcommand="ipa-client-install -U -d --hostname=$host --domain=$domain --server=$IPA_SERVER_NAME.$domain -p admin -w $kinit_pass"
 		ssh $host $ipafixcommand
             fi
 	done
