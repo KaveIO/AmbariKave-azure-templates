@@ -227,7 +227,7 @@ function check_reinstall_restart_all {
 	# previous attempt failed, so now reinstall
 	((REINSTALL_TRIALS--))
 	echo "previous pass failed, restarting all installations and services"
-	$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh 2>/dev/null
+	$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh $CLUSTER_NAME 2>/dev/null
 	# monitor and wait till the deployment finishes
 	wait_on_deploy
 	fix_freeipa_installation
