@@ -100,7 +100,7 @@ function wait_for_ambari {
 	sleep 60
 	echo "Waiting until ambari server is up and running..."
     done
-    if [ $count -eq 0 ] && [ $AMBARI_TRIALS -ne 0]; then
+    if [ $count -eq 0 ] && [ $AMBARI_TRIALS -ne 0 ]; then
 	((AMBARI_TRIALS--))
 	echo "ambari server is not up and running after 5 minutes waiting: cleaning and reinstalling NOW"
 	echo $AMBARI_TRIALS" ambari installation trials remaining."
@@ -223,7 +223,7 @@ function check_reinstall_restart_all {
 	if [[ "$installation_status_message" =~ "\"request_status\" : \"COMPLETED\"" ]]; then DEPLOYMENT_SUCCESS=1; fi
     fi
 
-    while [ $DEPLOYMENT_SUCCESS -ne 1 ] && [$REINSTALL_TRIALS -gt 0]; do
+    while [ $DEPLOYMENT_SUCCESS -ne 1 ] && [ $REINSTALL_TRIALS -gt 0 ]; do
 	# previous attempt failed, so now reinstall
 	((REINSTALL_TRIALS--))
 	echo "previous pass failed, restarting all installations and services"
