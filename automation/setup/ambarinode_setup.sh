@@ -24,7 +24,7 @@ BLUEPRINT_TRIALS=5
 AMBARI_TRIALS=5
 REINSTALL_TRIALS=5
 
-DEPLOYMENT_SUCCESS=-1 
+DEPLOYMENT_SUCCESS=-2
 
 function anynode_setup {
     chmod +x "$DIR/anynode_setup.sh"
@@ -208,13 +208,16 @@ function check_all_running {
             local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
 	    echo "Its state is "$state
 	    if [ $state = INSTALLED -o $state = INSTALL_FAILED ]; then
-		DEPLOYMENT_SUCCESS=0
-		# fixed in AmbariKave 2.1
-		if [[ $component = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
+		if [ $DEPLOYMENT_SUCCESS -ne -1 ]; then DEPLOYMENT_SUCCESS=0; fi
+		if [ $ state = INSTALL_FAILED ]; then
+		    DEPLOYMENT_SUCCESS=-1
+		    # fixed in AmbariKave 2.1
+		    if [[ $component = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
+		fi
 	    fi
 	done # loop over components
     done # loop over hosts
-    if [ $DEPLOYMENT_SUCCESS -eq -1 ]; then
+    if [ $DEPLOYMENT_SUCCESS -eq -2 ]; then
 	echo "All compoments on all hosts are up and running! Hurrah!"
 	DEPLOYMENT_SUCCESS=1
     fi    
@@ -237,10 +240,14 @@ function check_reinstall_restart_all {
 	wait_on_deploy
 	fix_freeipa_installation
 	check_all_running
-	if [ $DEPLOYMENT_SUCCESS -eq 0 ]; then
+	if [ $DEPLOYMENT_SUCCESS -eq -1 ]; then
 	    # we were not successful, try again
-	    DEPLOYMENT_SUCCESS=-1 # reset
+	    DEPLOYMENT_SUCCESS=-2 # reset
 	    check_reinstall_restart_all
+	elif [ $DEPLOYMENT_SUCESS -eq 0 ]; then
+	    #all installations done, some services stopped
+	    DEPLOYMENT_SUCCESS=-2
+	    start_all_services #TODO: implement
 	else
 	    echo "re-installation was successful!"
 	fi
@@ -254,6 +261,9 @@ function check_reinstall_restart_all {
         (>&2 echo "It was not possible to install and start all services. Please check contents of /var/lib/ambari-agent/data/ on failed hosts for more information.")
         return 3
     fi	
+}
+
+function start_all_services {
 }
 
 function fix_freeipa_installation {
