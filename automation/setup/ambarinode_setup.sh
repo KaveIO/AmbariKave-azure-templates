@@ -14,6 +14,7 @@ SWAP_SIZE=${10:-10g}
 WORKING_DIR=${11:-/root/kavesetup}
 CLUSTER_NAME=${8:-cluster}
 IPA_SERVER_NAME=${12:-ambari}
+HOMEDIR=${13:-\/root}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
@@ -65,6 +66,10 @@ function customize_hosts {
 
 function localize_cluster_file {
     $BIN_DIR/localize_cluster_file.sh "$KAVE_CLUSTER"
+}
+
+function localize_scripts {
+    $BIN_DIR/localize_scripts.sh "$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh" "$HOMEDIR"
 }
 
 function initialize_blueprint {
@@ -349,6 +354,8 @@ blueprint_deploy
 wait_on_deploy
 
 fix_freeipa_installation
+
+localize_scripts
 
 check_reinstall_restart_all
 
