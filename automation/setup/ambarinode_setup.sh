@@ -69,7 +69,8 @@ function localize_cluster_file {
 }
 
 function localize_scripts {
-    $BIN_DIR/localize_scripts.sh "$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh" "$HOMEDIR"
+    cp $WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh $WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh.template
+    $BIN_DIR/localize_scripts.sh "$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh.template" "$HOMEDIR"
 }
 
 function initialize_blueprint {

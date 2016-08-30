@@ -6,7 +6,7 @@ SCRIPT_FILE=${1:-"$DIR/../../restart_all_services.sh"}
 HOMEDIR=${2:-"\/root"}
 
 if [ -f "$SCRIPT_FILE" ]; then
-  sed -i s/'\$HOME'/$HOMEDIR/g "$SCRIPT_FILE"
+  sed -r s/'\$HOME'/$HOMEDIR/g "$SCRIPT_FILE" > "${SCRIPT_FILE%.*}"
 else 
   echo "$SCRIPT_FILE does not exist"
 fi 
