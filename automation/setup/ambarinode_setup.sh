@@ -209,7 +209,7 @@ function check_all_running {
 	    echo "Its state is "$state
 	    if [ $state = INSTALLED -o $state = INSTALL_FAILED ]; then
 		if [ $DEPLOYMENT_SUCCESS -ne -1 ]; then DEPLOYMENT_SUCCESS=0; fi
-		if [ $ state = INSTALL_FAILED ]; then
+		if [ $state = INSTALL_FAILED ]; then
 		    DEPLOYMENT_SUCCESS=-1
 		    # fixed in AmbariKave 2.1
 		    if [[ $component = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "rm -rf /opt/archiva; rm -rf /etc/init.d/archiva"; fi
@@ -248,9 +248,10 @@ function check_reinstall_restart_all {
              check_all_running # 1=success, -1=install failed, 0=install success, need start
 	done
 	# Is it possible to go back from INSTALLED to INSTALL_FAILED? 
-	while [ $DEPLOYMENT_SUCESS -eq 0 && [ $REINSTALL_TRIALS -gt 0 ]; do
+	while [ $DEPLOYMENT_SUCCESS -eq 0 && [ $REINSTALL_TRIALS -gt 0 ]; do
 	    #all installations done, some services stopped
 	    echo "All services are installed, starting the ones which are stopped"
+	    ((REINSTALL_TRIALS--))
 	    DEPLOYMENT_SUCCESS=-2
 	    start_all_services #TODO: implement
 	    wait_on_deploy
