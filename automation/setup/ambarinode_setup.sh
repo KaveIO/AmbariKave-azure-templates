@@ -232,25 +232,32 @@ function check_reinstall_restart_all {
     fi
 
     while [ $DEPLOYMENT_SUCCESS -ne 1 ] && [ $REINSTALL_TRIALS -gt 0 ]; do
-	# previous attempt failed, so now reinstall
-	((REINSTALL_TRIALS--))
-	echo "previous pass failed, restarting all installations and services"
-	$WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh $CLUSTER_NAME 2>/dev/null
-	# monitor and wait till the deployment finishes
-	wait_on_deploy
-	fix_freeipa_installation
+	# previous attempt failed, so now reinstall and restart
+	 echo "Starting reinstall and restart loop"
+
 	check_all_running
-	if [ $DEPLOYMENT_SUCCESS -eq -1 ]; then
+	while [ $DEPLOYMENT_SUCCESS -eq -1 ] && [ $REINSTALL_TRIALS -gt 0 ]; do
 	    # we were not successful, try again
-	    DEPLOYMENT_SUCCESS=-2 # reset
-	    check_reinstall_restart_all
-	elif [ $DEPLOYMENT_SUCESS -eq 0 ]; then
+	     echo "previous pass failed, restarting all installations and services"
+	     DEPLOYMENT_SUCCESS=-2 #reset
+             ((REINSTALL_TRIALS--))
+	     $WORKING_DIR/AmbariKave-$VERSION/dev/restart_all_services.sh $CLUSTER_NAME 2>/dev/null
+             # monitor and wait till the deployment finishes                                                                                                                                                 
+             wait_on_deploy
+             fix_freeipa_installation
+             check_all_running # 1=success, -1=install failed, 0=install success, need start
+	done
+	# Is it possible to go back from INSTALLED to INSTALL_FAILED? 
+	while [ $DEPLOYMENT_SUCESS -eq 0 && [ $REINSTALL_TRIALS -gt 0 ]; do
 	    #all installations done, some services stopped
+	    echo "All services are installed, starting the ones which are stopped"
 	    DEPLOYMENT_SUCCESS=-2
 	    start_all_services #TODO: implement
-	else
-	    echo "re-installation was successful!"
-	fi
+	    wait_on_deploy
+	    check_all_running
+	done
+	# in case the DEPLOYMENT_SUCCESS is not 1 at this stage, try again
+	echo "The reinstall loop finished with status "$DEPLOYMENT_SUCCESS
     done
 
     if [ $DEPLOYMENT_SUCCESS -eq 1 ]; then
@@ -264,6 +271,37 @@ function check_reinstall_restart_all {
 }
 
 function start_all_services {
+    echo "starting stopped  components on all hosts ..."
+    local command=$CURL_AUTH_COMMAND
+    local domain=`hostname -d`
+    for host in ${HOSTS[@]}; do
+        echo "checking host "$host
+        if [ $host = localhost ]; then continue; fi
+        local host=$host.$domain
+        local host_url=$(echo $COMPONENTS_URL | sed "s/<HOST>/$host/g")
+        local request="$command GET $host_url"
+        local components=($($request | grep "component_name" | awk -F '"' '{print $4}'))
+        for component in ${components[@]}; do
+            echo "checking component "$component
+            local check_response=$($request/$component)
+            local state=$(echo "$check_response" | grep "\"state\" :" | awk -F '"' '{print $4}')
+            echo "Its state is "$state
+            if [ $state = INSTALLED  ]; then
+		local service=$(echo "$check_response" | grep -m 1 "\"service_name\" :" | awk -F '"' '{print $4}')
+		local operation_request_template='{"RequestInfo":{"context":"Start <SERVICE>","operation_level":{"level":"HOST_COMPONENT","cluster_name":"<CLUSTER_NAME>","host_name":"<HOST>","service_name":"<SERVICE>"}},"Body":{"HostRoles":{"state":"<STATE>"}}}'
+		local operation_request=$(echo $operation_request_template | sed -e "s/<SERVICE>/$service/g" -e "s/<CLUSTER_NAME>/$CLUSTER_NAME/" -e "s/<HOST>/$host/")
+		local operation_url="$host_url/$component/?"
+		# dirty hack
+		if [[ $service = *ARCHIVA* ]]; then pdsh -w "$CSV_HOSTS" "mkdir -p /opt/archiva/conf"; fi
+
+		local start_request=$(echo "$operation_request" | sed 's/<STATE>/STARTED/')
+		echo $start_request
+		# now starting
+		sleep 5 # to not overflow Ambari with requests
+		$command PUT -d "$start_request" "$operation_url"
+            fi
+        done # loop over components                                                                                                                                                                           
+    done # loop over hosts     
 }
 
 function fix_freeipa_installation {
