@@ -249,7 +249,7 @@ function check_reinstall_restart_all {
              check_all_running # 1=success, -1=install failed, 0=install success, need start
 	done
 	# Is it possible to go back from INSTALLED to INSTALL_FAILED? 
-	while [ $DEPLOYMENT_SUCCESS -eq 0 && [ $REINSTALL_TRIALS -gt 0 ]; do
+	while [ $DEPLOYMENT_SUCCESS -eq 0 ] && [ $REINSTALL_TRIALS -gt 0 ]; do
 	    #all installations done, some services stopped
 	    echo "All services are installed, starting the ones which are stopped"
 	    ((REINSTALL_TRIALS--))
