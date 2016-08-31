@@ -14,7 +14,7 @@ SWAP_SIZE=${10:-10g}
 WORKING_DIR=${11:-/root/kavesetup}
 CLUSTER_NAME=${8:-cluster}
 IPA_SERVER_NAME=${12:-ambari}
-HOMEDIR=${13:-\/root}
+HOMEDIR=${13:-"\/root"}
 
 CURL_AUTH_COMMAND='curl --netrc -H X-Requested-By:KoASetup -X'
 CLUSTERS_URL="http://localhost:8080/api/v1/clusters"
