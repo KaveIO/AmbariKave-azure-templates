@@ -397,16 +397,16 @@ kave_install
 
 patch_ipa
 
-#wait_for_ambari
+wait_for_ambari
 
-#blueprint_deploy
+blueprint_deploy
 
-#wait_on_deploy
+wait_on_deploy
 
-#fix_freeipa_installation
+fix_freeipa_installation
 
 localize_scripts
 
-#check_reinstall_restart_all
+check_reinstall_restart_all
 
-#enable_kaveadmin
+enable_kaveadmin
