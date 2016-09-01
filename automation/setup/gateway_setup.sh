@@ -18,20 +18,14 @@ function extradisknode_setup {
 }
 
 function post_installation {
-    initialize_hdfs
     setup_vnc
-}
-
-initialize_hdfs() {
-    until which hadoop 2>&- && hadoop fs -ls / 2>&-; do
-	sleep 60
-	echo "Waiting until HDFS service is up and running..."
-    done
-    su - hdfs -c "hadoop fs -mkdir -p /user/$USER; hadoop fs -chown $USER:$USER /user/$USER"
+    setup_xrdp
+    remove_gnomepackagekit &
+    initialize_hdfs &
 }
 
 setup_vnc() {
-    until which vncserver vncpasswd 2>&-; do
+    until which vncserver 2>&- && which vncpasswd 2>&-; do
 	sleep 60
 	echo "Waiting until VNC is installed..."
     done
@@ -40,11 +34,42 @@ setup_vnc() {
     su - $USER -c "
         mkdir -p \"$vncdir\"
         echo \"$PASS\" | vncpasswd -f > \"$vncpasswd\"; chmod 600 \"$vncpasswd\"
-        vncserver
     "
+    echo "VNCSERVERS=\"1:$USER\"" >> /etc/sysconfig/vncservers
+    chkconfig vncserver on
+    service vncserver start
 }
+
+setup_xrdp() {
+    yum install -y xrdp
+    sed -i "s/tsusers/$USER/" /etc/xrdp/sesman.ini
+    chkconfig xrdp on
+    service xrdp start
+}
+
+remove_gnomepackagekit() {
+    until yum list installed | grep "PackageKit*" 2>&-; do
+      # querying can take some time, so rather do not do it very often
+      sleep 120
+      echo "Waiting until PackakeKit is installed..."
+    done
+      # sleep just in case the installation is not yet finished
+      sleep 60
+      yum remove -y PackageKit
+}
+
+initialize_hdfs() {
+    until which hadoop 2>&- && hadoop fs -ls / 2>&-; do
+        sleep 60
+        echo "Waiting until HDFS service is up and running..."
+    done
+    su - hdfs -c "hadoop fs -mkdir -p /user/$USER; hadoop fs -chown $USER:$USER /user/$USER"
+}
+
 
 extradisknode_setup
 
 #Why in the background? The ambari node depends as a resource on the rest of the nodes. Whether for bug or feature, Azure waits for the creation of the dependent VMs, not for their setups, to complete. In case this behavior is corrected in the future, and this should be the case IMHO, this script will return and give the greenlight to the provision of the ambari node.
-post_installation &
+#Why it is not? Because actually Azure does not enforce dependency on the setup, plus we are sure that when the deployment on Azure is shown as Completed we are really ready to connect.
+
+post_installation

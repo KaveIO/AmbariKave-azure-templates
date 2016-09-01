@@ -6,7 +6,7 @@
 	}, {
 		"kavelanding": {
 			"AMBARI_ADMIN": "admin",
-			"AMBARI_ADMIN_PASS": "admin"
+			"AMBARI_ADMIN_PASS": "<KAVE_ADMIN_PASS>"
 		}
 	}, {
 		"core-site": {
@@ -48,33 +48,32 @@
 		        "mapreduce.map.java.opts": "-Xmx7372m",
 			"mapreduce.reduce.java.opts": "-Xmx7372m",
 			"yarn.app.mapreduce.am.resource.mb": "9216",
-		        "yarn.app.mapreduce.am.command-opts": "-Xmx7372",
-			"mapreduce.task.io.sort.mb": "3686"
+		        "yarn.app.mapreduce.am.command-opts": "-Xmx7372m",
+			"mapreduce.task.io.sort.mb": "2047"
 		}
 	}, {
 		"freeipa": {
-			"ldap_bind_password": "testtestdirpass1234",
-			"directory_password": "testtestdirpass1234",
-			"initial_users_and_groups": "{\"Users\" : [\"<KAVE_ADMIN>\"], \"Groups\" : {\"admins\" : [\"<KAVE_ADMIN>\"], \"hadoop\" : [\"<KAVE_ADMIN>\"]}}",
-			"initial_user_passwords": "{\"someadmin\": \"ProbablySwimmingNearestDriver\"}"
+			"ldap_bind_password": "<KAVE_ADMIN_PASS>",
+			"directory_password": "<KAVE_ADMIN_PASS>",
+			"initial_users_and_groups": "{\"Users\" : [\"<KAVE_ADMIN>\"], \"Groups\" : {\"admins\" : [\"<KAVE_ADMIN>\"], \"hadoop\" : [\"<KAVE_ADMIN>\"]}}"
 		}
 	}, {
 		"sonarqube": {
-			"sonar_database_user_passwd": "admin"
+			"sonar_database_user_passwd": "<KAVE_ADMIN_PASS>"
 		}
 	}, {
 		"gitlab": {
 			"gitlab_port": "8888",
-			"gitlab_admin_password": "temptest999999",
+			"gitlab_admin_password": "<KAVE_ADMIN_PASS>",
 			"unicorn_port": "8887"
 		}
 	}, {
 		"twiki": {
-			"ldap_bind_password": "testtestdirpass1234"
+			"ldap_bind_password": "<KAVE_ADMIN_PASS>"
 		}
 	}, {
 		"jenkins": {
-			"JENKINS_ADMIN_PASSWORD": "blahblahsomeadminthingy"
+			"JENKINS_ADMIN_PASSWORD": "<KAVE_ADMIN_PASS>"
 		}
 	}],
 	"host_groups": [{
@@ -210,7 +209,7 @@
 		"name": "ci",
 		"configurations": [{
 			"sonarqube": {
-				"sonar_database_user_passwd": "admin"
+				"sonar_database_user_passwd": "<KAVE_ADMIN_PASS>"
 			},
 			"jboss": {
 				"http_port": 9999
