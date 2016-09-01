@@ -82,7 +82,7 @@
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
-		"branchName": "popular_prep",
+		"branchName": "master",
                 "templateName": "tmpl-hdp-with-ci",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
