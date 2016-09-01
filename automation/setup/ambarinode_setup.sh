@@ -171,12 +171,13 @@ wait_on_deploy_impl() {
     sleep 300
     local command="$CURL_AUTH_COMMAND"
     local count=150
-    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -ne 0; do
+    while ($command GET "$CLUSTERS_URL/$CLUSTER_NAME/requests?fields=Requests" 2> /dev/null | egrep "IN_PROGRESS|PENDING|QUEUED") && test $count -gt 0; do
 	((count--))
-	sleep 15
+	sleep 20
 	echo "Waiting for background tasks in Ambari to complete..."
     done
-    test $count -ne 0
+    echo "there are $count remaining counts"
+    test $count -gt 0
 }
 
 
