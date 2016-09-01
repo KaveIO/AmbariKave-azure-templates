@@ -336,7 +336,7 @@ function fix_freeipa_installation {
     done
     local kinit_pass=$(cat $kinit_pass_file)
     local pipe_hosts=$(echo "$CSV_HOSTS" | sed 's/localhost,\?//' | tr , '|')
-    local ipacommand="ipa 1>/dev/null | wc -l"
+    local ipacommand="ipa 2>&1 >/dev/null"
     until local failed_hosts=$(pdsh -w "$CSV_HOSTS" "echo $kinit_pass | kinit admin" 2>&1 >/dev/null | sed -nr "s/($pipe_hosts): kinit:.*/\1.`hostname -d`/p" | tr '\n' , | head -c -1); test -z $failed_hosts; do
 	if [ $retries -eq 0 ]; then
 	    (>&2 echo "FreeIPA reinstall retries exceeded, you will have to install the IPA client yourself on the following nodes: '$failed_hosts'. Skipping...")
@@ -363,7 +363,7 @@ function fix_freeipa_installation {
 	    sleep 10
 	    # sometimes the ipa configuration may fail on some nodes. Try to do automatic reconfiguration
 	    local ipamisconfig=`ssh $host $ipacommand`
-	    if [ $ipamisconfig -ne 0 ]; then
+	    if ! (ssh $host $ipacommand); then
 		# command 'ipa' returned error that can mean misconfiguration
 		local domain=`ssh $host "hostname -d"`
 		local ipafixcommand="ipa-client-install -U -d --hostname=$host --domain=$domain --server=$IPA_SERVER_NAME.$domain -p admin -w $kinit_pass"
