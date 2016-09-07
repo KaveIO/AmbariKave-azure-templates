@@ -45,7 +45,7 @@
 	"variables": {
 	        "KAVENetworkPrefix": "10.0.0.0/16",
  	        "KAVENetworkSubnet": "10.0.0.0/24",
-	        "KAVECentOSVersion": "7.1",
+	        "KAVECentOSVersion": "7.2",
 	        "dnsLabelPrefix" : "[parameters('ClusterName')]",
 	        "saPremiumName" : "[concat(parameters('ClusterName'),'p')]",
 	        "saName" : "[parameters('ClusterName')]",
