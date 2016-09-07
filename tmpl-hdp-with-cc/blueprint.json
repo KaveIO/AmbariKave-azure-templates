@@ -71,7 +71,22 @@
 			"name": "FREEIPA_SERVER"
 		}, {
 			"name": "FREEIPA_CLIENT"
-		}],
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "SPARK_CLIENT"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}
+		],
 		"cardinality": "1"
 	}, {
 		"name": "gateway",
@@ -186,6 +201,22 @@
 			"name": "FREEIPA_CLIENT"
 		}, {
 			"name": "METRICS_MONITOR"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}, {
+			"name": "SQOOP"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "SPARK_CLIENT"
 		}],
 		"cardinality": "1+"
 	}],
