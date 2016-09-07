@@ -9,7 +9,7 @@ WORKING_DIR=${2:-/root/kavesetup}
 function patch_kave {
     # The support for centos 7 and the fix for long domain names mess each other up. Get rid of the guard in the params file to work it with 
 	# the longnames check avoided.... 
-    cp "$WORKING_DIR"/contents/automation/patch/freeipa_params.py "$WORKING_DIR"/AmbariKave-$VERSION/src/HDP/2.4.KAVE/services/FREEIPA/package/scripts/params.py
+    cp "$WORKING_DIR"/contents/automation/patch/freeipa_params.py "$WORKING_DIR"/AmbariKave-$VERSION/src/KAVE/services/FREEIPA/package/scripts/params.py
 }
 
 wget  --tries=10 --read-timeout=60 "https://github.com/KaveIO/AmbariKave/archive/$VERSION.zip" -O "$WORKING_DIR/$VERSION.zip"
