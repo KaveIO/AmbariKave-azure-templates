@@ -30,16 +30,17 @@ function setup_repo {
 }
 
 function patch_yum {
-    set_archive_repo
+	# centos 7 fix. 
+    # set_archive_repo
     set_v4_only
 }
 
-set_archive_repo() {
-    #The 6.5 dirs were wiped out the default yum repo of OpenLogic, therefore we have to use the official repo. So yes 6.5 is still supported as the 6 branch still is, even if the latest-greatest is 6.8.
-    local repodir=/etc/yum.repos.d
-    rm $repodir/*
-    cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
-}
+#set_archive_repo() {
+#    #The 6.5 dirs were wiped out the default yum repo of OpenLogic, therefore we have to use the official repo. So yes 6.5 is still supported as the 6 branch still is, even if the latest-greatest is 6.8.
+#    local repodir=/etc/yum.repos.d
+#    rm $repodir/*
+#    cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
+#}
 
 set_v4_only() {
     #Not sure why is this but yum tries to use v6 pretty randomly. Last time I failed possibly because of this, let's just force v4.
@@ -47,7 +48,10 @@ set_v4_only() {
 }
 
 function install_packages {
-    yum install -y epel-release
+    
+	# centos 7 fix. epel is installed differently
+	# yum install -y epel-release
+	rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
 
     yum install -y sshpass pdsh
 
