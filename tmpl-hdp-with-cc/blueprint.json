@@ -10,20 +10,10 @@
 		}
 	}, {
 		"core-site": {
-			"hadoop.proxyuser.hue.hosts": "*",
-			"hadoop.proxyuser.hue.groups": "*",
 			"hadoop.proxyuser.hcat.groups": "*",
-			"hadoop.proxyuser.hcat.hosts": "*"
-		}
-	}, {
-		"webhcat-site": {
-			"webhcat.proxyuser.hue.hosts": "*",
-			"webhcat.proxyuser.hue.groups": "*"
-		}
-	}, {
-		"oozie-site": {
-			"oozie.service.ProxyUserService.proxyuser.hue.hosts": "*",
-			"oozie.service.ProxyUserService.proxyuser.hue.groups": "*"
+			"hadoop.proxyuser.hcat.hosts": "*",
+			"hadoop.proxyuser.root.groups": "*",
+			"hadoop.proxyuser.root.hosts": "*"
 		}
 	}, {
 		"hdfs-site": {
@@ -39,7 +29,7 @@
 			"yarn.nodemanager.resource.memory-mb": "27648",
 			"yarn.scheduler.minimum-allocation-mb": "9216",
 			"yarn.scheduler.maximum-allocation-mb": "27648",
-		        "yarn.timeline-service.store-class": "org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore"
+		    "yarn.timeline-service.store-class": "org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore"
 		}
 	}, {
 		"mapred-site": {
@@ -147,8 +137,6 @@
 			"name": "WEBHCAT_SERVER"
 		}, {
 			"name": "MYSQL_SERVER"
-		}, {
-			"name": "HUE_SERVER"
 		}, {
 			"name": "ZOOKEEPER_CLIENT"
 		}, {
