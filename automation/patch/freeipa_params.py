@@ -111,4 +111,7 @@ searchpath = default('configurations/freeipa/searchpath',
 # folderpath="/jre/lib/security:/lib/security"
 folderpath = default('configurations/freeipa/folderpath', '/jre/lib/security:/lib/security')
 
+long_domain_patch = default("configurations/freeipa/long_domain_patch", False)
+long_domain_patch = kc.trueorfalse(long_domain_patch)
+
 admin_user_shell = default('configurations/freeipa/admin_user_shell', '/sbin/nologin')
