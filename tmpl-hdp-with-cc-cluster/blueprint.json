@@ -1,0 +1,216 @@
+{
+	"configurations": [{
+		"ams-site": {
+			"timeline.metrics.service.operation.mode": "embedded"
+		}
+	}, {
+		"kavelanding": {
+			"AMBARI_ADMIN": "admin",
+			"AMBARI_ADMIN_PASS": "<KAVE_ADMIN_PASS>"
+		}
+	}, {
+		"core-site": {
+			"hadoop.proxyuser.hcat.groups": "*",
+			"hadoop.proxyuser.hcat.hosts": "*",
+			"hadoop.proxyuser.root.groups": "*",
+			"hadoop.proxyuser.root.hosts": "*"
+		}
+	}, {
+		"hdfs-site": {
+			"dfs.webhdfs.enabled": "true"
+		}
+	}, {
+		"hive-site": {
+			"hive.heapsize": "1024",
+			"javax.jdo.option.ConnectionPassword": "admin"
+		}
+	}, {
+		"yarn-site": {
+			"yarn.nodemanager.resource.memory-mb": "27648",
+			"yarn.scheduler.minimum-allocation-mb": "9216",
+			"yarn.scheduler.maximum-allocation-mb": "27648",
+		    "yarn.timeline-service.store-class": "org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore"
+		}
+	}, {
+		"mapred-site": {
+			"mapreduce.map.memory.mb": "9216",
+			"mapreduce.reduce.memory.mb": "9216",
+		        "mapreduce.map.java.opts": "-Xmx7372m",
+			"mapreduce.reduce.java.opts": "-Xmx7372m",
+			"yarn.app.mapreduce.am.resource.mb": "9216",
+		        "yarn.app.mapreduce.am.command-opts": "-Xmx7372m",
+			"mapreduce.task.io.sort.mb": "2047"
+		}
+	}, {
+		"freeipa": {
+			"ldap_bind_password": "<KAVE_ADMIN_PASS>",
+			"directory_password": "<KAVE_ADMIN_PASS>",
+			"initial_users_and_groups": "{\"Users\" : [\"<KAVE_ADMIN>\"], \"Groups\" : {\"admins\" : [\"<KAVE_ADMIN>\"], \"hadoop\" : [\"<KAVE_ADMIN>\"]}}"
+		}
+	}],
+	"host_groups": [{
+		"name": "admin",
+		"configurations": [],
+		"components": [{
+			"name": "AMBARI_SERVER"
+		}, {
+			"name": "METRICS_COLLECTOR"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "FREEIPA_SERVER"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "SPARK_CLIENT"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}
+		],
+		"cardinality": "1"
+	}, {
+		"name": "gateway",
+		"configurations": [],
+		"components": [{
+			"name": "KAVETOOLBOXGATE"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}, {
+			"name": "KAVELANDING"
+		}, {
+			"name": "SQOOP"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "SPARK_CLIENT"
+		}],
+		"cardinality": "0-10"
+	}, {
+		"name": "namenode-1",
+		"components": [{
+			"name": "NAMENODE"
+		}, {
+			"name": "RESOURCEMANAGER"
+		}, {
+			"name": "APP_TIMELINE_SERVER"
+		}, {
+			"name": "HISTORYSERVER"
+		}, {
+			"name": "ZOOKEEPER_SERVER"
+		}, {
+			"name": "PIG"
+		}, {
+			"name": "HCAT"
+		}, {
+			"name": "HIVE_SERVER"
+		}, {
+			"name": "HIVE_METASTORE"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "OOZIE_SERVER"
+		}, {
+			"name": "WEBHCAT_SERVER"
+		}, {
+			"name": "MYSQL_SERVER"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "KAVETOOLBOXNODE"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "SPARK_THRIFTSERVER"
+		}],
+		"cardinality": "1"
+	}, {
+		"name": "namenode-2",
+		"configurations": [],
+		"components": [{
+			"name": "SECONDARY_NAMENODE"
+		}, {
+			"name": "KAVETOOLBOXNODE"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "SPARK_JOBHISTORYSERVER"
+		}],
+		"cardinality": "1"
+	}, {
+		"name": "data",
+		"components": [{
+			"name": "DATANODE"
+		}, {
+			"name": "NODEMANAGER"
+		}, {
+			"name": "KAVETOOLBOXNODE"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "METRICS_MONITOR"
+		}],
+		"cardinality": "1+"
+	}, {
+		"name": "cc",
+		"configurations": [],
+		"components": [{
+			"name": "KAVETOOLBOXNODE"
+		}, {
+			"name": "FREEIPA_CLIENT"
+		}, {
+			"name": "METRICS_MONITOR"
+		}, {
+			"name": "HDFS_CLIENT"
+		}, {
+			"name": "YARN_CLIENT"
+		}, {
+			"name": "MAPREDUCE2_CLIENT"
+		}, {
+			"name": "SQOOP"
+		}, {
+			"name": "HIVE_CLIENT"
+		}, {
+			"name": "TEZ_CLIENT"
+		}, {
+			"name": "ZOOKEEPER_CLIENT"
+		}, {
+			"name": "SPARK_CLIENT"
+		}],
+		"cardinality": "1+"
+	}],
+	"Blueprints": {
+		"blueprint_name": "KAVEAzureCustomerCompass",
+		"stack_name": "HDP",
+		"stack_version": "2.4.KAVE"
+	}
+}
