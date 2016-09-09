@@ -14,7 +14,7 @@ function setup_repo {
     
     mkdir -p "$WORKING_DIR"
     
-    wget  --tries=10 --read-timeout=60 -O "$WORKING_DIR/scripts.zip" "$REPOSITORY"
+    wget --tries=10 --read-timeout=60 -O "$WORKING_DIR/scripts.zip" "$REPOSITORY"
 
     unzip -d "$WORKING_DIR/temp" "$WORKING_DIR/scripts.zip" 
 
@@ -30,50 +30,33 @@ function setup_repo {
 }
 
 function patch_yum {
-	# centos 7 fix. 
-    # set_archive_repo
-    set_v4_only
+    amend_yum_conf
 }
 
-#set_archive_repo() {
-#    #The 6.5 dirs were wiped out the default yum repo of OpenLogic, therefore we have to use the official repo. So yes 6.5 is still supported as the 6 branch still is, even if the latest-greatest is 6.8.
-#    local repodir=/etc/yum.repos.d
-#    rm $repodir/*
-#    cp "$AUTOMATION_DIR"/patch/CentOS-Official.repo $repodir
-#}
-
-set_v4_only() {
-    #Not sure why is this but yum tries to use v6 pretty randomly. Last time I failed possibly because of this, let's just force v4.
+amend_yum_conf() {
+    #Not sure why is this but yum tries to use v6 pretty randomly - once I failed possibly because of this, let's just force v4. Also, let's just try forever to install a package - if an install
+    #does not happen we are in trouble anyway.
     echo "ip_resolve=4" >> /etc/yum.conf
+    echo "retries=0" >> /etc/yum.conf
 }
 
 function install_packages {
     
-	# centos 7 fix. epel is installed differently
-	# yum install -y epel-release
-	rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+    # centos 7 fix. epel is installed differently
+    # yum install -y epel-release
+    rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
 
+    yum clean all
+    
     yum install -y sshpass pdsh
 
     yum install -y rpcbind
+
+    yum install -y ipa-server ipa-client
 }
 
 function change_rootpass {
     echo root:$PASS | chpasswd
-}
-
-function configure_swap {
-    local swapfile=/mnt/resource/swap$SWAP_SIZE
-
-    fallocate -l "$SWAP_SIZE" "$swapfile"
-
-    chmod 600 "$swapfile"
-
-    mkswap "$swapfile"
-
-    swapon "$swapfile"
-
-    echo -e "$swapfile\tnone\tswap\tsw\t0\t0" >> /etc/fstab
 }
 
 function disable_iptables {
@@ -98,10 +81,6 @@ install_packages
 
 change_rootpass
 
-configure_swap
-
 disable_iptables
 
 disable_selinux
-
-
