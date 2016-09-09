@@ -765,7 +765,7 @@
 					"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 				}
 			}
-		} {
+		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(variables('CCDQLNodeName'),'-',copyIndex(),variables('extensionName'))]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -788,7 +788,7 @@
 					"commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
 				}
 			}
-		},
+		}
 	],
 	"outputs": {
 		"fqdn": {
