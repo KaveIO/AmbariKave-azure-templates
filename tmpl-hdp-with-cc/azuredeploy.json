@@ -82,7 +82,7 @@
 		"publicIPAddressName": "KAVEPublicIP",
 		"publicIPAddressType": "Static",
 		"extensionName": "/setup",
-		"branchName": "CustomerCompass",
+		"branchName": "CustomerCompass-KoA",
                 "templateName": "tmpl-hdp-with-cc",
 		"contentHost": "raw.githubusercontent.com",
 		"mainHost": "github.com",
