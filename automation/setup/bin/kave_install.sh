@@ -24,8 +24,6 @@ download_kave
 yum remove -y epel-release
 yum remove -y sshpass pdsh
 
-service iptables stop
-chkconfig iptables off
 cd "$WORKING_DIR/AmbariKave-$VERSION"
 dev/install.sh
 patch_kave

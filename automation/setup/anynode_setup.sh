@@ -59,13 +59,6 @@ function change_rootpass {
     echo root:$PASS | chpasswd
 }
 
-function disable_iptables {
-    #The deploy_from_blueprint KAVE script performs a number of commands on the cluster hosts. Among these, it reads like iptables is stopped, but not permanently. It must be off as otherwise, at least a priori, the FreeIPA clients cannot talk to eachother. We want these changes to be permanent in the (remote) case that the system goes down or is rebooted - otherwise KAVE will stop working afterwards.
-    #To be fixed in KAVE
-    service iptables stop
-    chkconfig iptables off
-}
-
 function disable_selinux {
     #Same story as iptables, SELinux must be permanently off but it is only temporary disabled in the blueprint deployment script.
     #To be fixed in KAVE
@@ -80,7 +73,5 @@ patch_yum
 install_packages
 
 change_rootpass
-
-disable_iptables
 
 disable_selinux
