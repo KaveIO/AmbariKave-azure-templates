@@ -7,5 +7,5 @@
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
 
 3. Indicate username and password to be able to log into the KAVE. They should be at least **8 characters** long. Note that during the installation the password is stored in a plain text in log files, so make sure to change it after the cluster is up and running.
-
+    a. It is important to note that the password must not contain the characters like " ", "&", "\", "<" . Using any of these characters would put you into trouble, thus disabling you to run many of the services. Basically, it would start to fail for all.
 4. Indicate the names for your storage, premium storage and domain name prefix. These names should be unique and contain only a-z characters and numbers
