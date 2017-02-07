@@ -9,13 +9,18 @@
   "host_groups" : [
     {
       "name" : "admin",
-      "configurations" : [ ],
+      "configurations" : [ {
+	  "mongodb": {
+	      "tcp_port": 29999
+	      }
+   } ],
       "components" : [
         { "name" : "AMBARI_SERVER"   },
         { "name" : "METRICS_COLLECTOR"  },
         { "name" : "ZOOKEEPER_SERVER"   },
         { "name" : "METRICS_MONITOR"    },
-        { "name" : "ZOOKEEPER_CLIENT"   }
+        { "name" : "ZOOKEEPER_CLIENT"   },
+        { "name" : "MONGODB_MASTER" }
       ],
       "cardinality" : "1"
     },
