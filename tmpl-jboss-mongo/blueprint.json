@@ -12,7 +12,10 @@
       "configurations" : [ {
 	  "mongodb": {
 	      "tcp_port": 29999
-	      }
+	      },
+	  "jboss" : {
+	      "http_port" : 9999
+	  }
    } ],
       "components" : [
         { "name" : "AMBARI_SERVER"   },
@@ -20,7 +23,8 @@
         { "name" : "ZOOKEEPER_SERVER"   },
         { "name" : "METRICS_MONITOR"    },
         { "name" : "ZOOKEEPER_CLIENT"   },
-        { "name" : "MONGODB_MASTER" }
+        { "name" : "MONGODB_MASTER" },
+	{ "name" : "JBOSS_APP_SERVER" }
       ],
       "cardinality" : "1"
     },
