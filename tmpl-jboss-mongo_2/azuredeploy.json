@@ -315,7 +315,7 @@
 	"type": "Microsoft.Compute/virtualMachines",
 	"location": "[variables('location')]",
 	"dependsOn": [
-	    "[concat('Microsoft.Storage/storageAccounts/',variables('saName'))]",
+	    "[concat('Microsoft.Storage/storageAccounts/',parameters('saName'))]",
 	    "[concat('Microsoft.Network/networkInterfaces/', variables('CiNicName'))]"
 	    ],
 	"tags": {
@@ -340,7 +340,7 @@
 		"osDisk": {
 		    "name": "[concat(parameters('CiNodeName'), 'OSDisk')]",
 		    "vhd": {
-			"uri": "[concat('http://',variables('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'OSDisk', '.vhd')]"
+			"uri": "[concat('http://',parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'OSDisk', '.vhd')]"
 			},
 		    "caching": "ReadWrite",
 		    "createOption": "FromImage"
