@@ -334,7 +334,7 @@
 		"imageReference": {
 		    "publisher": "[variables('KAVEImagePublisher')]",
 		    "offer": "[variables('KAVEImageOffer')]",
-		    "sku": "[variables('KAVECentOSVersion')]",
+		    "sku": "[parameters('KAVECentOSVersion')]",
 		    "version": "latest"
 		    },
 		"osDisk": {
