@@ -270,7 +270,7 @@
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]",
-	"[concat('Microsoft.Compute/virtualMachines/', variables('CiNodeName'))]",
+	"[concat('Microsoft.Compute/virtualMachines/', parameters('CiNodeName'))]",
        ],
       "tags": {
         "displayName": "[parameters('AmbariNodeName')]"
