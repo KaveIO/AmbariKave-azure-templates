@@ -1,0 +1,46 @@
+{
+  "configurations" : [
+    {
+      "ams-site" : {
+        "timeline.metrics.service.operation.mode" : "embedded"
+      }
+    }
+  ],
+  "host_groups" : [
+    {
+      "name" : "admin",
+      "configurations" : [ {
+	  "mongodb": {
+	      "tcp_port": 29999
+	      },
+	  "jboss" : {
+	      "http_port" : 9999
+	  }
+   } ],
+      "components" : [
+        { "name" : "AMBARI_SERVER"   },
+        { "name" : "METRICS_COLLECTOR"  },
+        { "name" : "ZOOKEEPER_SERVER"   },
+        { "name" : "METRICS_MONITOR"    },
+        { "name" : "ZOOKEEPER_CLIENT"   },
+        { "name" : "MONGODB_MASTER" },
+	{ "name" : "JBOSS_APP_SERVER" }
+      ],
+      "cardinality" : "1"
+    },
+    {
+      "name" : "default",
+      "configurations" : [ ],
+      "components" : [
+        { "name" : "METRICS_MONITOR"   },
+        { "name" : "ZOOKEEPER_CLIENT"  }
+      ],
+      "cardinality" : "0-10"
+    }
+  ],
+  "Blueprints" : {
+    "blueprint_name" : "dev",
+    "stack_name" : "HDP",
+    "stack_version" : "2.4.KAVE"
+  }
+}

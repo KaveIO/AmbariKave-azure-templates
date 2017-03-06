@@ -1,0 +1,403 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "KAVEAdminUserName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Username of the admin user"
+      }
+    },
+    "KAVEAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password of the admin user"
+      }
+    },
+    "saName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique name for the azure storage account wich will be used for regular storage"
+      }
+    },
+    "dnsLabelPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name prefix for the Public IP used to access the Gateway."
+      }
+    },
+    "AmbariNodeName": {
+      "type": "string",
+      "defaultValue": "ambari",
+      "minLength": 1,
+      "metadata": {
+        "description": "The machine name of the Ambari node."
+      }
+    },
+    "AmbariNodeSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2_v2"
+    },
+      "CiNodeName": {
+      "type": "string",
+      "defaultValue": "ci",
+      "minLength": 1,
+      "metadata": {
+        "description": "Data proxy."
+      }
+    },
+   "CiNodeSize": {
+	"type": "string",
+	"defaultValue": "Standard_D2_v2"
+    },
+    "KAVENetworkPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "KAVENetworkSubnet": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    },
+    "KAVECentOSVersion": {
+      "type": "string",
+      "defaultValue": "6.5",
+      "allowedValues": [
+        "6.5"
+      ]
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "apiVersionStorage": "2016-01-01",
+    "apiVersionNetwork": "2016-03-30",
+    "apiVersionCompute": "2016-03-30",
+    "KAVEnetworkSubnet1Name": "Subnet-1",
+    "KAVEnetworkSubnet1Prefix": "[parameters('KAVENetworkSubnet')]",
+    "KAVEImagePublisher": "OpenLogic",
+    "KAVEImageOffer": "CentOS",
+    "AmbariNodeDiskName": "[parameters('AmbariNodeName')]",
+    "AmbariNicName": "[concat(parameters('AmbariNodeName'), 'NiC')]",
+    "CiNicName": "[concat(variables('CiNodeName'), 'NiC')]",
+    "KAVEVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'KAVEnetwork')]",
+    "KAVESubnetRef": "[concat(variables('KAVEVnetID'), '/subnets/', variables('KAVEnetworkSubnet1Name'))]",
+    "publicNetworkSecurityGroupsName": "KAVEPublicSecurityGroup",
+    "KAVEStorageAccountContainerName": "vhds",
+    "KAVEStdStorageType": "Standard_LRS",
+    "KAVEStdStorageKind": "Storage",
+    "publicIPAddressName": "KAVEPublicIP",
+    "publicIPAddressType": "Static",
+    "extensionName": "/setup",
+    "branchName": "CanteenMockup",
+    "templateName": "tmpl-jboss-mongo_2",
+    "contentHost": "raw.githubusercontent.com",
+    "mainHost": "github.com",
+    "pathURI": "/KaveIO/AmbariKave-azure-templates/",
+    "baseContentURI": "[concat('https://',variables('contentHost'),variables('pathURI'),variables('branchName'))]",
+    "baseMainURI": "[concat('https://',variables('mainHost'),variables('pathURI'))]",
+    "setupScriptsPath": "/automation/setup/",
+    "anyNodeSetupScript": "anynode_setup.sh",
+    "ambariNodeSetupScript": "ambarinode_setup.sh",
+    "extraDiskNodeSetupScript": "extradisknode_setup.sh",
+    "gatewaySetupScript": "gateway_setup.sh",
+    "anyNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('anyNodeSetupScript'))]",
+    "ambariNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('ambariNodeSetupScript'))]",
+    "extraDiskNodeSetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('extraDiskNodeSetupScript'))]",
+    "gatewaySetupURI": "[concat(variables('baseContentURI'), variables('setupScriptsPath'), variables('gatewaySetupScript'))]",
+    "scriptInterpreter": "/bin/bash",
+    "commandToExecuteAnyNode": "[concat(variables('scriptInterpreter'), ' ', variables('anyNodeSetupScript'))]",
+    "commandToExecuteExtraDiskNode": "[concat(variables('scriptInterpreter'), ' ', variables('extraDiskNodeSetupScript'))]",
+    "commandToExecuteAmbariNode": "[concat(variables('scriptInterpreter'), ' ', variables('ambariNodeSetupScript'))]",
+    "commandToExecuteGateway": "[concat(variables('scriptInterpreter'), ' ', variables('gatewaySetupScript'))]",
+    "kaveScriptsURI": "[concat(variables('baseMainURI'),'archive/',variables('branchName'),'.zip')]",
+    "kaveBlueprint": "[concat(variables('baseContentURI'), '/', variables('templateName'), '/', 'blueprint.json')]",
+    "kaveCluster": "[concat(variables('baseContentURI'), '/', variables('templateName'), '/', 'cluster.json')]",
+    "nodes": "'ambari ci'",
+    "version": "2.0-Beta",
+    "gateExtraDisk": "/dev/sdc",
+    "dataNodeExtraDisk": "/dev/sdc",
+    "gateMountPoint": "/data",
+    "dataNodeMountPoint": "/hadoop"
+  },
+  "resources": [
+    {
+      "name": "[parameters('saName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[variables('location')]",
+      "apiVersion": "[variables('apiVersionStorage')]",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "saKAVE01"
+      },
+      "sku": {
+        "name": "[variables('KAVEStdStorageType')]"
+      },
+      "kind": "[variables('KAVEStdStorageKind')]"
+    },
+    {
+      "name": "KAVEnetwork",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[variables('location')]",
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "KAVEnetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('KAVENetworkPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('KAVEnetworkSubnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('KAVEnetworkSubnet1Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('AmbariNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('publicNetworkSecurityGroupsName'))]"
+      ],
+      "tags": {
+        "displayName": "[variables('AmbariNicName')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('KAVESubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+
+    },
+    {
+	"apiVersion": "[variables('apiVersionNetwork')]",
+	"type": "Microsoft.Network/networkInterfaces",
+	"name": "[variables('CiNicName')]",
+	"location": "[variables('location')]",
+	"dependsOn": [
+	    "[concat('Microsoft.Network/virtualNetworks/', 'KAVEnetwork')]"
+	    ],
+	"tags": {
+	    "displayName": "[variables('CiNicName')]"
+	    },
+	"properties": {
+	    "ipConfigurations": [{
+		"name": "ipconfig1",
+		"properties": {
+		    "privateIPAllocationMethod": "Dynamic",
+		    "publicIPAddress": {
+			"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                    },
+		    "subnet": {
+			"id": "[variables('KAVESubnetRef')]"
+			}
+		    }
+		}]
+	    }
+	},
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('publicNetworkSecurityGroupsName')]",
+      "apiVersion": "[variables('apiVersionNetwork')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "VNC",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5900-5999",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "name": "[parameters('AmbariNodeName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+      "apiVersion": "[variables('apiVersionCompute')]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('saName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('AmbariNicName'))]",
+	"[concat('Microsoft.Compute/virtualMachines/', variables('CiNodeName'))]",
+       ],
+      "tags": {
+        "displayName": "[parameters('AmbariNodeName')]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('AmbariNodeSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('AmbariNodeName')]",
+          "adminUsername": "[parameters('KAVEAdminUsername')]",
+          "adminPassword": "[parameters('KAVEAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('KAVEImagePublisher')]",
+            "offer": "[variables('KAVEImageOffer')]",
+            "sku": "[parameters('KAVECentOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('AmbariNodeName'), 'OSDisk')]",
+            "vhd": {
+              "uri": "[concat('http://', parameters('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('AmbariNodeName'), 'OSDisk', '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('AmbariNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+	"apiVersion": "[variables('apiVersionCompute')]",
+	"name": "[variables('CiNodeName')]",
+	"type": "Microsoft.Compute/virtualMachines",
+	"location": "[variables('location')]",
+	"dependsOn": [
+	    "[concat('Microsoft.Storage/storageAccounts/',variables('saName'))]",
+	    "[concat('Microsoft.Network/networkInterfaces/', variables('CiNicName'))]"
+	    ],
+	"tags": {
+	    "displayName": "[variables('CiNodeName')]"
+	    },
+	"properties": {
+	    "hardwareProfile": {
+		"vmSize": "[parameters('CiNodeSize')]"
+		},
+	    "osProfile": {
+		"computerName": "[variables('CiNodeName')]",
+		"adminUsername": "[parameters('KAVEAdminUsername')]",
+		"adminPassword": "[parameters('KAVEAdminPassword')]"
+		},
+	    "storageProfile": {
+		"imageReference": {
+		    "publisher": "[variables('KAVEImagePublisher')]",
+		    "offer": "[variables('KAVEImageOffer')]",
+		    "sku": "[variables('KAVECentOSVersion')]",
+		    "version": "latest"
+		    },
+		"osDisk": {
+		    "name": "[concat(variables('CiNodeName'), 'OSDisk')]",
+		    "vhd": {
+			"uri": "[concat('http://',variables('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', variables('CiNodeName'), 'OSDisk', '.vhd')]"
+			},
+		    "caching": "ReadWrite",
+		    "createOption": "FromImage"
+		    }
+		},
+	    "networkProfile": {
+		"networkInterfaces": [{
+		    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('CiNicName'))]"
+		    }]
+		}
+	    }
+	},
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('AmbariNodeName'), variables('extensionName'))]",
+      "apiVersion": "[variables('apiVersionCompute')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('AmbariNodeName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": "[split(concat(variables('anyNodeSetupURI'),' ',variables('ambariNodeSetupURI')), ' ')]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat(variables('commandToExecuteAmbariNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'),' ',variables('nodes'),' ',variables('version'),' ',variables('kaveBlueprint'),' ',variables('kaveCluster'))]"
+        }
+      }
+    },
+   {
+       "type": "Microsoft.Compute/virtualMachines/extensions",
+       "name": "[concat(variables('CiNodeName'), variables('extensionName'))]",
+       "apiVersion": "[variables('apiVersionCompute')]",
+       "location": "[variables('location')]",
+       "dependsOn": [
+	   "[concat('Microsoft.Compute/virtualMachines/', variables('CiNodeName'))]"
+	   ],
+       "properties": {
+	   "publisher": "Microsoft.OSTCExtensions",
+	   "type": "CustomScriptForLinux",
+	   "typeHandlerVersion": "1.4",
+	   "settings": {
+	       "fileUris": "[split(variables('anyNodeSetupURI'), ' ')]"
+	       },
+	   "protectedSettings": {
+	       "commandToExecute": "[concat(variables('commandToExecuteAnyNode'),' ',variables('kaveScriptsURI'),' ',parameters('KAVEAdminUserName'),' ',parameters('KAVEAdminPassword'))]"
+	       }
+	   }
+       }
+      
+  ],
+  "outputs": {
+    "fqdn": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses','KAVEPublicIP')).dnsSettings.fqdn]",
+      "type": "string"
+    }
+  }
+}
