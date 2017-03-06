@@ -39,7 +39,7 @@
       "type": "string",
       "defaultValue": "Standard_D2_v2"
     },
-      "CiNodeName": {
+    "CiNodeName": {
       "type": "string",
       "defaultValue": "ci",
       "minLength": 1,
@@ -78,7 +78,8 @@
     "KAVEImageOffer": "CentOS",
     "AmbariNodeDiskName": "[parameters('AmbariNodeName')]",
     "AmbariNicName": "[concat(parameters('AmbariNodeName'), 'NiC')]",
-    "CiNicName": "[concat(variables('CiNodeName'), 'NiC')]",
+    "CiNodeDiskName": "[parameters('CiNodeName')]",
+    "CiNicName": "[concat(parameters('CiNodeName'), 'NiC')]",
     "KAVEVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'KAVEnetwork')]",
     "KAVESubnetRef": "[concat(variables('KAVEVnetID'), '/subnets/', variables('KAVEnetworkSubnet1Name'))]",
     "publicNetworkSecurityGroupsName": "KAVEPublicSecurityGroup",
@@ -310,7 +311,7 @@
     },
     {
 	"apiVersion": "[variables('apiVersionCompute')]",
-	"name": "[variables('CiNodeName')]",
+	"name": "[parameters('CiNodeName')]",
 	"type": "Microsoft.Compute/virtualMachines",
 	"location": "[variables('location')]",
 	"dependsOn": [
@@ -318,14 +319,14 @@
 	    "[concat('Microsoft.Network/networkInterfaces/', variables('CiNicName'))]"
 	    ],
 	"tags": {
-	    "displayName": "[variables('CiNodeName')]"
+	    "displayName": "[parameters('CiNodeName')]"
 	    },
 	"properties": {
 	    "hardwareProfile": {
 		"vmSize": "[parameters('CiNodeSize')]"
 		},
 	    "osProfile": {
-		"computerName": "[variables('CiNodeName')]",
+		"computerName": "[parameters('CiNodeName')]",
 		"adminUsername": "[parameters('KAVEAdminUsername')]",
 		"adminPassword": "[parameters('KAVEAdminPassword')]"
 		},
@@ -337,9 +338,9 @@
 		    "version": "latest"
 		    },
 		"osDisk": {
-		    "name": "[concat(variables('CiNodeName'), 'OSDisk')]",
+		    "name": "[concat(parameters('CiNodeName'), 'OSDisk')]",
 		    "vhd": {
-			"uri": "[concat('http://',variables('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', variables('CiNodeName'), 'OSDisk', '.vhd')]"
+			"uri": "[concat('http://',variables('saName'), '.blob.core.windows.net/', variables('KAVEStorageAccountContainerName'), '/', parameters('CiNodeName'), 'OSDisk', '.vhd')]"
 			},
 		    "caching": "ReadWrite",
 		    "createOption": "FromImage"
@@ -374,11 +375,11 @@
     },
    {
        "type": "Microsoft.Compute/virtualMachines/extensions",
-       "name": "[concat(variables('CiNodeName'), variables('extensionName'))]",
+       "name": "[concat(parameters('CiNodeName'), variables('extensionName'))]",
        "apiVersion": "[variables('apiVersionCompute')]",
        "location": "[variables('location')]",
        "dependsOn": [
-	   "[concat('Microsoft.Compute/virtualMachines/', variables('CiNodeName'))]"
+	   "[concat('Microsoft.Compute/virtualMachines/', parameters('CiNodeName'))]"
 	   ],
        "properties": {
 	   "publisher": "Microsoft.OSTCExtensions",
