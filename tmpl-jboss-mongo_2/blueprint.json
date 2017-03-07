@@ -18,7 +18,7 @@
         { "name" : "AMBARI_SERVER"   },
         { "name" : "METRICS_COLLECTOR"  },
         { "name" : "METRICS_MONITOR"    },
-        { "name" : "MONGODB_MASTER" },
+        { "name" : "MONGODB_MASTER" }
       ],
       "cardinality" : "1"
     },
@@ -39,8 +39,7 @@
       "name" : "default",
       "configurations" : [ ],
       "components" : [
-        { "name" : "METRICS_MONITOR"   },
-        { "name" : "ZOOKEEPER_CLIENT"  }
+        { "name" : "METRICS_MONITOR"   }
       ],
       "cardinality" : "0-10"
     }
